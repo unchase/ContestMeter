@@ -1,0 +1,103 @@
+﻿@using ContestMeter.Web.Site.Models
+@model ContestsTasksDeleteViewModel
+
+@{
+    ViewBag.Title = "Удаление задачи";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Удаление задачи</h2>
+
+<h3 class="alert alert-warning">Вы действительно хотите удалить эту задачу?</h3>
+
+<div class="col-md-12 alert alert-info">
+    <dl>
+        @Html.HiddenFor(model => model.ContestId)
+        @Html.HiddenFor(model => model.TaskId)
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ExecutableName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ExecutableName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CheckerName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CheckerName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TestsFolder)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TestsFolder)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TimeLimit)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TimeLimit)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Weight)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Weight)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.MaxSourceSize)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MaxSourceSize)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.MaxMemorySize)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MaxMemorySize)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Rating)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Rating)
+        </dd>
+    </dl>
+    
+    <br />
+    <iframe class="col-md-12" src="@Model.TaskDescriptionFileName" height="400" style="border:0; margin-bottom: 25px"></iframe>
+    <br />
+
+    @using (Html.BeginForm("TasksDelete", "Contests", new { model = Model }, FormMethod.Post)) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color col-lg-offset-4 col-md-8">
+            <input type="submit" value="Удалить" class="btn btn-default" /> |
+            @Html.ActionLink("Вернуться к списку задач", "Edit", new { id = Model.ContestId })
+        </div>
+    }
+</div>

@@ -1,0 +1,53 @@
+﻿@using ContestMeter.Web.Site.Models
+@model TeamsCreateViewModel
+
+@{
+    ViewBag.Title = "Создать новую команду";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Создать новую команду</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal alert alert-warning">
+        @Html.ValidationSummary(true)
+
+        <div class="form-group">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Name, "Название", new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Name)
+                    @Html.ValidationMessageFor(model => model.Name)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.MaxTeamNumber, "Максимальное количество участников", new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.MaxTeamNumber)
+                    @Html.ValidationMessageFor(model => model.MaxTeamNumber)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Создать" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Вернуться к списку команд", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+

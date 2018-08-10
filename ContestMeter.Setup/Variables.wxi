@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+  <?define ProductName="ContestMeter" ?>
+  <?define ProductVersion="1.0.0.0" ?>
+  <?define ProductCode="B38D620B-B046-4E89-A3AE-251FF8856052"?>
+  <?define UpgradeCode="4FA98715-E493-4B8F-8A72-6F230A7BDC8E"?>
+  <?define Manufacturer="SFEDU"?>
+  
+  <?define SystemRootDrive="c:\"?>
+  
+  <?define ContestMeterWebsiteId="319326478"?>
+  
+  <?define DataBaseName="ContestMeterDb"?>
+  <?define CreateDataBaseScriptName="ContestMeterDb.sql"?>
+</Include>

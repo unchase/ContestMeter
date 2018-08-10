@@ -1,0 +1,5 @@
+{
+	"_tasks":[
+				 {"CheckerName":"magic-numbers-checker.exe","ExecutableName":"magic-numbers","Name":"magic numbers","TestsFolder":"magic-numbers","TimeLimit":2,"Weight":5},
+			]
+}

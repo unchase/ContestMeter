@@ -1,0 +1,55 @@
+﻿@model ContestMeter.Web.Site.Database.Entities.Contest
+
+@{
+    ViewBag.Title = "Удаление контеста";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Удаление контеста</h2>
+
+<h3 class="alert alert-warning">Вы уверены, что хотите удалить этот контест?</h3>
+<div class="alert alert-info">
+    <dl class="dl-horizontal">
+        <dt>
+            Тип контеста
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ContestsType.Name)
+        </dd>
+
+        <dt>
+            Учитель
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Teacher.UserName)
+        </dd>
+
+        <dt>
+            Название
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            Активный?
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsActive)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Удалить" class="btn btn-default" /> |
+            @Html.ActionLink("Вернуться к списку контестов", "Index")
+        </div>
+    }
+</div>

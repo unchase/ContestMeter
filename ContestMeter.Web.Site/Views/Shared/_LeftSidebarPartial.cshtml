@@ -1,0 +1,30 @@
+﻿@if (User.IsInRole("administrator"))
+{
+    <ul class="list-group nav">
+        <li class="list-group-item">@Html.ActionLink("Контесты", "Index", "Contests")</li>
+        <li class="list-group-item">@Html.ActionLink("Команды", "Index", "Team")</li>
+        <li class="list-group-item">@Html.ActionLink("Администрирование", "Main", "Administrator")</li>
+        <li class="list-group-item">@Html.ActionLink("Регистрация/удаление аккаунтов", "DeletedAccountsList", "Administrator")</li>
+        <li class="list-group-item">@Html.ActionLink("Новости", "News", "Administrator")</li>
+    </ul>
+}
+else if (User.IsInRole("teacher"))
+{
+    <ul class="list-group nav">
+        <li class="list-group-item">@Html.ActionLink("Контесты", "Index", "Contests")</li>
+        <li class="list-group-item">@Html.ActionLink("Команды", "Index", "Team")</li>
+        @*<li class="list-group-item"><a href="/">Действие учителя 2</a></li>
+        <li class="list-group-item"><a href="/">Действие учителя 3</a></li>
+        <li class="list-group-item"><a href="/">Действие учителя 4</a></li>*@
+    </ul>
+}
+else if (User.IsInRole("participant"))
+{
+    <ul class="list-group nav">
+        <li class="list-group-item">@Html.ActionLink("Контесты", "Contests", "Participant")</li>
+        <li class="list-group-item">@Html.ActionLink("Команды", "Index", "Team")</li>
+        @*<li class="list-group-item"><a href="/">Действие участника 2</a></li>
+        <li class="list-group-item"><a href="/">Действие участника 3</a></li>
+        <li class="list-group-item"><a href="/">Действие участника 4</a></li>*@
+    </ul>
+}

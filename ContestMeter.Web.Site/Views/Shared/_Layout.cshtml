@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="@Url.Content("~/favicon.ico")" />
+    <link rel="shortcut icon" href="@Url.Content("~/favicon.ico")" />
+    <title>@ViewBag.Title - ContestMeter</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    @*<span class="icon-bar"></span>*@
+                    <span class="icon-bar"></span>
+                </button>
+                @*@Html.ActionLink("ContestMeter", "Index", "Home", null, new { @class = "navbar-brand" })*@
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Домашняя", "Index", "Home")</li>
+                    <li>@Html.ActionLink("О системе", "About", "Home")</li>
+                    @*<li>@Html.ActionLink("Контакты", "Contact", "Home")</li>*@
+                </ul>
+                @Html.Partial("_LoginPartial")
+            </div>
+        </div>
+    </div>
+    @if (Request.IsAuthenticated)
+    {
+        <aside class="col-md-3" style="margin-top: 20px; text-align: center">@Html.Partial("_LeftSidebarPartial")</aside>
+        <section class="col-md-9">
+            <div class="body-content">
+                @RenderBody()
+                <hr />
+                <footer>
+                    <p>&copy; 2014-@DateTime.Now.Year - ContestMeter</p>
+                </footer>
+            </div>
+        </section>
+    }
+    else
+    {
+        <section class="col-md-12">
+            <div class="body-content">
+                @RenderBody()
+                <hr />
+                <footer>
+                    @if (DateTime.Now.Year >= 2014)
+                    {
+                        <p>&copy; 2014-@DateTime.Now.Year - ContestMeter</p>
+                    }
+                    else
+                    {
+                        <p>&copy; 2014-2015 - ContestMeter</p>
+                    }
+                </footer>
+            </div>
+        </section>
+    }
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

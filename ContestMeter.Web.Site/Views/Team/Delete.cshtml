@@ -1,0 +1,64 @@
+﻿@model ContestMeter.Web.Site.Database.Entities.Team
+
+@{
+    ViewBag.Title = "Удаление команды";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Удаление команды</h2>
+
+<h3 class="alert alert-warning">Вы уверены, что хотите удалить эту команду?</h3>
+<div class="alert alert-info">
+    <dl class="dl-horizontal">
+        <dt>
+            Название
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            Количество контестов
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Contests.Count)
+        </dd>
+
+        <dt>
+            Количество участников
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Participants.Count)
+        </dd>
+
+        <dt>
+            Максимальное количество участников
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MaxTeamNumber)
+        </dd>
+
+        <dt>
+            Рейтинг
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Rating)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Удалить" class="btn btn-default" /> |
+            @Html.ActionLink("Вернуться к списку команд", "Index")
+        </div>
+    }
+</div>

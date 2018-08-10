@@ -1,0 +1,50 @@
+﻿@using ContestMeter.Web.Site.Models
+@model ContestsDevelopmentToolsDeleteViewModel
+@{
+    ViewBag.Title = "Удаление компилятора";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Удаление компилятора</h2>
+
+<h3 class="alert alert-warning">Вы действительно хотите удалить этот компилятор?</h3>
+<div class="col-md-12 alert alert-info">
+    <dl class="col-md-12">
+        @Html.HiddenFor(model => model.ContestId)
+        @Html.HiddenFor(model => model.DevelopmentToolId)
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CompileCommand)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CompileCommand)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CommandArgs)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CommandArgs)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color col-lg-offset-4 col-md-8">
+            <input type="submit" value="Удалить" class="btn btn-default" /> |
+            @Html.ActionLink("Вернуться к списку компиляторов", "Edit", new { id = Model.ContestId })
+        </div>
+    }
+</div>

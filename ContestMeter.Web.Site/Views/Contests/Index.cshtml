@@ -1,0 +1,82 @@
+﻿@using ContestMeter.Web.Site.Models
+@using ContestMeter.Web.Site.Database.Entities
+@model ContestsIndexViewModel
+
+@{
+    ViewBag.Title = "Контесты";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string trclass;
+}
+
+<h2 class="alert alert-info">Контесты</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Contests)
+    
+    <p>
+        @Html.ActionLink("Добавить", "Create")
+    </p>
+    <table class="table">
+        <tr>
+            <th>
+                Тип контеста
+            </th>
+            <th>
+                Преподаватель
+            </th>
+            <th>
+                Контест
+            </th>
+            <th>
+                Активный
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model.Contests)
+        {
+            if (item.IsActive)
+            {
+                trclass = "alert alert-success";
+            }
+            else
+            {
+                trclass = "alert alert-danger";
+            }
+            
+            <tr class= "@trclass">
+                <td>
+                    @Html.DisplayFor(modelItem => item.ContestsType.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Teacher.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsActive)
+                    @*@Html.EditorFor(modelItem => item.IsActive)*@
+                </td>
+                <td>
+                    @Html.ActionLink("Редактировать", "Edit", new {id = item.Id}) |
+                    @Html.ActionLink("Информация", "Information", "Participant", new { id = item.Id }, null) |
+                    @Html.ActionLink("Журнал ошибок", "ExceptionsLogs", new { id = item.Id }) |
+                    @Html.ActionLink("Удалить", "Delete", new {id = item.Id})
+                </td>
+            </tr>
+        }
+    </table>
+    
+    @*<div class="col-md-12">
+        <input type="submit" value="Сохранить" class="btn btn-default" />
+    </div>*@
+    <br />
+}
+
+<hr />
+<div class="col-md-12">
+    @Html.ActionLink("На главную страницу",  "Index", "Home")
+</div>

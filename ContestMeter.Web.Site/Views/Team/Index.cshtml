@@ -1,0 +1,79 @@
+﻿@using ContestMeter.Web.Site.Models
+@using ContestMeter.Web.Site.Database.Entities
+@model TeamsIndexViewModel
+
+@{
+    ViewBag.Title = "Команды";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Команды</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Teams)
+    if (TempData["Message"] != null && TempData["Message"].ToString() != "")
+    {
+        <br />
+        <div class="col-md-12 alert alert-danger">@TempData["Message"]</div>
+        <br />
+    }
+    <p>
+        @Html.ActionLink("Добавить", "Create")
+    </p>
+    <table class="table">
+        <tr>
+            <th>
+                Название
+            </th>
+            <th>
+                Количество контестов
+            </th>
+            <th>
+                Количество участников
+            </th>
+            <th>
+                Максимальное количество участников
+            </th>
+            <th>
+                Рейтинг
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model.Teams)
+        {
+            <tr class="alert alert-success">
+                <td>
+                    <b>@Html.DisplayFor(modelItem => item.Name)</b>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Contests.Count)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Participants.Count)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MaxTeamNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Rating)
+                </td>
+                <td>
+                    @Html.ActionLink("Редактировать", "Edit", new { id = item.Id }, null) |
+                    @*@Html.ActionLink("Участники", "TeamParticipantsList", new { id = item.Id }, null) |
+                    @Html.ActionLink("Контесты", "TeamContestsList", new { id = item.Id }, null) |*@
+                    @Html.ActionLink("Удалить", "Delete", new { id = item.Id }, null)
+                </td>
+            </tr>
+        }
+    </table>
+    <br />
+}
+
+<hr />
+<div class="col-md-12">
+    @Html.ActionLink("На главную страницу", "Index", "Home")
+</div>
+

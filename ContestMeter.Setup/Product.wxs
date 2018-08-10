@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension"
+     xmlns:iis="http://schemas.microsoft.com/wix/IIsExtension"
+     xmlns:sql="http://schemas.microsoft.com/wix/SqlExtension"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  
+  <!--включим в проект файл с глобальными переменными-->
+  <?include Variables.wxi?>
+    
+	<Product Id="$(var.ProductCode)" Name="$(var.ProductName)" Language="1049" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)" Codepage="1251">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" Manufacturer="$(var.Manufacturer)" Description="Установочный пакет для тестирующей системы ContestMeter" Comments="Устанавливает и настраивает компоненты IIS, .NET Framework, MSSQL Server и файлы проекта ContestMeter" SummaryCodepage="1251" />
+
+		<MajorUpgrade DowngradeErrorMessage="Более новая версия [ProductName] уже установлена." />
+    <Media Id="1" Cabinet="media.cab" EmbedCab="yes"/>
+
+    <!--выбираем корневую директорию для установки-->
+    <Property Id="ROOTDRIVE">
+      <![CDATA[$(var.SystemRootDrive)]]>
+    </Property>
+    
+    <!--проверка, что установщик запускается под администратором-->
+    <Property Id="MSIUSEREALADMINDETECTION" Value="1" />
+    <Condition Message="Для запуска этого установщика необходимы права администратора.">
+      <![CDATA[Installed OR (Privileged AND AdminUser)]]>
+    </Condition>
+    
+    <!--проверка, была ли установлен на пользовательском компьютере .NET Framework 4.5-->
+    <PropertyRef Id="NETFRAMEWORK45" />
+    <Condition Message="Установка данного приложения требует наличия установленного .NET Framework 4.5.">
+      <![CDATA[Installed OR NETFRAMEWORK45]]>
+    </Condition>
+
+    <!--ToDo: сделать проверку, был ли установлен SQL Server-->
+    <!--<Property Id="SQLSERVERFINDVERSION">
+        <RegistrySearch Id="SqlServerFindVersion"
+          Root="HKLM" Key="SOFTWARE\Microsoft\MSSQLServer\MSSQLServer\CurrentVersion"
+          Name="CurrentVersion"
+          Type="raw"/>
+      </Property>
+      <Condition Message="Установка данного приложения требует наличия установленного Microsoft SQL Server 2008 или выше.">
+        <![CDATA[Installed OR SQLSERVERFINDVERSION >= "#10"]]>
+      </Condition>-->
+  
+    
+    <!--проверка, был ли установлен сервер IIS версии большей либо равной той, что указана в переменной IisRequiredVersion-->
+    <!--<PropertyRef Id="IISMAJORVERSION"/>
+    <Condition Message="Установка данного приложения требует наличия установленного IIS 6 или выше.">
+      <![CDATA[Installed OR IISMAJORVERSION = "#6" OR IISMAJORVERSION = "#7" OR IISMAJORVERSION = "#8"]]>
+    </Condition>-->
+    
+    <!--выставляем необходимые для настройки iis свойства-->
+    <PropertyRef Id="NETFRAMEWORK40FULLINSTALLROOTDIR"/>
+    <SetProperty Id="ASPNETISAPIDLL" Sequence="execute" Before="ConfigureIIs" Value="[NETFRAMEWORK40FULLINSTALLROOTDIR]aspnet_isapi.dll" />
+    <SetProperty Id="ASPNETREGIIS" Sequence="execute" Before="ConfigureIIs" Value="[NETFRAMEWORK40FULLINSTALLROOTDIR]aspnet_regiis.exe" />
+    
+    <!--добавляем действие для того, чтобы наш сайт использовал asp.net 4.0-->
+    <CustomAction Id="MapVirtualDirectory" Directory="INSTALLWEBALLLOCATION" Return="asyncNoWait" ExeCommand='[ASPNETREGIIS] -norestart -s "W3SVC/$(var.ContestMeterWebsiteId)/ROOT/contestmeter"' />
+    <InstallExecuteSequence>
+      <Custom Action="MapVirtualDirectory" After="InstallFinalize">ASPNETREGIIS AND NOT Installed</Custom>
+    </InstallExecuteSequence>
+
+    
+    <!--наборы компонентов-->
+    
+    <!--компонент для основных файлов ContestMeter-->
+    <Feature Id="ContestMeterFeature" Title="$(var.ProductName)" Level="1" Description="Установка компонентов $(var.ProductName)" Display="expand" ConfigurableDirectory="INSTALLLOCATION" AllowAdvertise="no" Absent="disallow" InstallDefault="local">
+	  <Feature Id="RequiredComponents" Title="Необходимые компоненты $(var.ProductName)" Description="Выжные компоненты для работоспособности $(var.ProductName)" Level="1" AllowAdvertise="no" Absent="disallow" InstallDefault="local">
+        <ComponentRef Id="ProgramDeleteShortcut"/>
+        <ComponentRef Id="ProgramMenuDir"/>
+        <ComponentRef Id="ProgramMenuDocumentsDirComponent"/>
+        <ComponentRef Id="ProgramMenuUtilitiesDirComponent"/>
+        <ComponentRef Id="ProgramsMenuShortcut"/>
+		<ComponentRef Id="ProgramMenuInternetLinkShortcutComponent"/>		
+		<ComponentRef Id="InternetLinkShortcutComponent"/>
+	    <ComponentRef Id="WindowsBaseDllFileComponent"/>
+      </Feature>
+      <Feature Id="HelpFiles" Title="Справочная информация $(var.ProductName)" Description="Справочная информация о программе $(var.ProductName)" Level="2" AllowAdvertise="no" Absent="allow" InstallDefault="source">
+        <Feature Id="GeneralHelpFiles" Title="Руководство пользователя $(var.ProductName)" Description="Руководство пользователя программы $(var.ProductName)" Level="2" AllowAdvertise="system" Absent="allow" InstallDefault="followParent">
+          <ComponentRef Id="GeneralHelp"/>
+        </Feature>
+        <Feature Id="AdditionalHelpFiles" Title="Руководство администратора $(var.ProductName)" Description="Руководство администратора программы $(var.ProductName)" Level="2" AllowAdvertise="system" Absent="allow" InstallDefault="followParent">
+          <ComponentRef Id="AdminHelp"/>
+        </Feature> 
+      </Feature>
+	</Feature> 
+    
+    <!--компонент для IIS-->
+    <Feature Id="IISFeature" Title="IIS" Level="1" Description="Установка компонентов IIS" Display="expand" ConfigurableDirectory="INSTALLWEBALLLOCATION" AllowAdvertise="no" Absent="allow" InstallDefault="local">
+      <Feature Id="IISFiles" Title="Основные файлы IIS" Description="Устанавливает необходимые файлы и каталоги IIS" Level="1" AllowAdvertise="no" Absent="allow" InstallDefault="followParent">
+		<ComponentGroupRef Id="SourceComponentGroup"/>
+		<ComponentRef Id="IISConfigCreateFolderComponent"/>
+        <ComponentRef Id="IISConfigCheckersCreateFolderComponent"/>
+        <ComponentRef Id="IISConfigTestsCreateFolderComponent"/>
+		<ComponentRef Id="DataBaseMdfFileComponent"/>
+		<ComponentRef Id="DataBaseLdfFileComponent"/>  
+      </Feature>
+      <!--компоненты с установкой вспомогательных утилит для настройки IIS-->
+      <Feature Id="UtilsFiles" Title="Вспомогательные утилиты $(var.ProductName)" Description="Вспомогательные утилиты для установки компонентов IIS на различных ОС для $(var.ProductName)" Level="2" AllowAdvertise="no" Absent="allow" InstallDefault="local">
+        <Feature Id="UtilForWinServer2008BeforeFiles" Title="Вспомогательные утилиты для ОС младше Windows2008" Description="Вспомогательные утилиты для установки компонентов IIS для ОС младше Windows2008" Level="2" AllowAdvertise="system" Absent="allow" InstallDefault="followParent">
+          <ComponentRef Id="InstallIISBeforeWinServer2008ComponentsComponent"/>
+        </Feature>
+        <Feature Id="UtilForWin7x64AndAfterFiles" Title="Вспомогательные утилиты для ОС Windows7 и старше" Description="Вспомогательные утилиты для установки компонентов IIS для ОС Windows7 и старше" Level="2" AllowAdvertise="system" Absent="allow" InstallDefault="followParent">
+          <ComponentRef Id="InstallIISWin7x64ComponentsComponent"/>
+        </Feature>
+      </Feature>
+      <!--компоненты с установкой и настройкой web-сайта iis-->
+      <Feature Id="IISWebsite" Title="Web-сайт IIS ContestMeter" Description="Устанавливает и конфигурирует web-сайт contestmeter" Level="1" AllowAdvertise="no" Absent="allow" InstallDefault="followParent">
+        <ComponentRef Id="ContestMeterAppPoolComponent" Primary="yes"/>
+        <ComponentRef Id="InstallContestMeterWebsiteComponent"/>
+        <ComponentRef Id="ContestMeterVirtualDirComponent"/>
+        <ComponentRef Id="ASPNet4ExtensionComponent"/>
+        <ComponentRef Id="ContestMeterIISUSRSPermissionComponent"/>
+      </Feature>
+    </Feature>
+  
+    <!--пиктограммы-->
+    <!--пиктограмма для ярлыков помощи-->
+    <Icon Id="HelpIcon.ico" SourceFile="Resources\Icons\Symbol-Help.ico"/>
+    <!--пиктограмма для вспомогательных утилит-->
+    <Icon Id="UtilsIcon.ico" SourceFile="Resources\Icons\ContestMeterUtilsIcon.ico"/>
+	<!--пиктограмма для основного шортката-->
+	<!--<Icon Id="ShortcutIcon.ico" SourceFile="Resources\Icons\ArmyProjectIcon.ico"/>-->	
+    
+    <!--определяем свой UI (измененный WixUI_Mondo)-->
+    <UI Id="ContestMeterUI">
+      <UIRef Id="WixUI_ContestMeterMondo"/>
+    </UI>
+	</Product>
+
+  <!--фрагмент с описанием дерева каталогов (включая меню пуск и рабочий стол)-->
+  <Fragment Id="ContestMeterDirectoriesFragment">
+    <Directory Id="TARGETDIR" Name="SourceDir"> <!--виртуальный корневой элемент для всех папок, которые будут использоваться для установки проекта.-->
+      <Directory Id="ProgramFilesFolder"> <!--папка Program Files (на что указывает Id=«ProgramFilesFolder»).-->
+        <Directory Id="INSTALLLOCATION" Name="$(var.ProductName)"> <!--папка с именем продукта в папке Program Files.-->
+          <Directory Id="HelpFilesFolder" Name="Doc"/> <!--подкаталог Doc-->
+          <Directory Id="UtilsFolder" Name="Utils"/>
+        </Directory>
+      </Directory>
+      <!--c:\inetpub\contestmeter-->
+      <Directory Id="INETPUB" Name="inetpub">
+        <Directory Id="INSTALLWEBALLLOCATION" Name="contestmeter">
+		  <Directory Id="APPDATAFOLDER" Name="App_Data"/>
+          <Directory Id="CONTESTMETERBIN" Name="bin"/>
+          <Directory Id="CONTESTMETERCONFIG" Name="Config">
+            <Directory Id="CONTESTMETERCONFIGCHECKERS" Name="Checkers"/>
+            <Directory Id="CONTESTMETERCONFIGTESTS" Name="Tests"/>
+          </Directory>
+        </Directory>
+      </Directory>
+      <!--Пуск\Программы\ContestMeter-->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ProgramMenuDir" Name="$(var.ProductName)">
+          <Directory Id="ProgramMenuDocumentsDir" Name="Документы"/>
+          <Directory Id="ProgramMenuUtilitiesDir" Name="Утилиты"/>
+        </Directory>
+      </Directory>
+      <Directory Id="DesktopFolder"/> <!--рабочий стол-->
+    </Directory>
+	</Fragment>
+
+  <!--фрагмент с основными файлами программы-->
+  <Fragment Id="MainContestMeterFragment">
+    <!--содержимое для размещения в каталоге с идентификатором INSTALLLOCATION (элементы в каталоге с программой)-->
+    <DirectoryRef Id="INSTALLLOCATION">
+	  <Component Id="InternetLinkShortcutComponent" Guid="9932E736-EB4A-4500-B55E-DEC21E6A30F7">
+		<CreateFolder/>
+		<util:InternetShortcut Id="LocalHostContestmeterShortcut" Name="Contestmeter" Target="http://localhost"/>
+	  </Component>
+		
+      <!--ярлык для удаления программы-->
+      <Component Id="ProgramDeleteShortcut" Guid="BEDBCDD6-8CBC-4396-8AD0-F919D49F63B1">
+        <Shortcut Id="UninstallMainProduct" Name="Удалить $(var.ProductName)" Target="[System64Folder]msiexec.exe" Arguments="/x [ProductCode]" Description="Удаляет приложение $(var.ProductName) с данного компьютера"/>
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+  
+    <!--вспомогательные утилиты для настройки IIS в меню пуск-->
+    <DirectoryRef Id="UtilsFolder">
+      <!--компонент для установки компонентов IIS для Windows2008 и младше-->
+      <Component Id="InstallIISBeforeWinServer2008ComponentsComponent" Guid="7258B2EE-EE89-4BA9-B425-0F8E6C5857E9">
+        <File Id="InstallIISBeforeWinServer2008Components" Name="InstallIISBeforeWinServer2008Components.bat" DiskId="1" KeyPath="yes" Compressed="yes" Source="Resources\Utilities\InstallIISBeforeWinServer2008Components.bat">
+          <Shortcut Id="InstallIISBeforeWinServer2008ComponentsShortcut" Name="Установка компонентов IIS для Windows младше Windows2008" Description="Устанавливает необходимые компоненты IIS для развертывания web-сайта contestmeter (необходимо, если при установке или ранее это не было сделано)" WorkingDirectory="UtilsFolder" Directory="ProgramMenuUtilitiesDir" Advertise="yes" Icon="UtilsIcon.ico"/>
+        </File>
+      </Component>
+      <!--компонент для установки компонентов IIS для Windows7 и старше-->
+      <Component Id="InstallIISWin7x64ComponentsComponent" Guid="1D95EF0D-533D-4B36-BDA1-09491DB90D14">
+        <File Id="InstallIISWin7x64Components" Name="InstallIISWin7x64Components.bat" DiskId="1" KeyPath="yes" Compressed="yes" Source="Resources\Utilities\InstallIISWin7x64Components.bat">
+          <Shortcut Id="InstallIISWin7x64ComponentsShortcut" Name="Установка компонентов IIS для Windows7 и старше" Description="Устанавливает необходимые компоненты IIS для развертывания web-сайта contestmeter (необходимо, если при установке или ранее это не было сделано)" WorkingDirectory="UtilsFolder" Directory="ProgramMenuUtilitiesDir" Advertise="yes" Icon="UtilsIcon.ico"/>
+        </File>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="ProgramMenuDocumentsDir">
+      <Component Id="ProgramMenuDocumentsDirComponent" Guid="82020749-34C7-4AC6-9AC5-20F209FF3C05">
+        <RemoveFolder Id="ProgramMenuDocumentsDir" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="ProgramMenuUtilitiesDir">
+      <Component Id="ProgramMenuUtilitiesDirComponent" Guid="AC6BF32E-B288-4872-9714-D4A8A3FA8EA9">
+        <RemoveFolder Id="ProgramMenuUtilitiesDir" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+    
+    <!--каталог в меню Пуск. Удаление при деинсталяции-->
+    <DirectoryRef Id="ProgramMenuDir">
+      <Component Id="ProgramMenuDir" Guid="7F4FD9E6-4CC0-48CC-B6D6-E74D0F85DF0B">
+        <RemoveFolder Id="ProgramMenuDir" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="" KeyPath="yes"/>
+      </Component>
+      <!--ярлык для удаления программы-->
+      <Component Id="ProgramsMenuShortcut" Guid="EECA60A1-0066-46D2-AB9E-D25513711472">
+        <Shortcut Id="UninstallProduct" Name="Удалить $(var.ProductName)" Target="[System64Folder]msiexec.exe" Arguments="/x [ProductCode]" Description="Удаляет приложение $(var.ProductName) с данного компьютера"/>
+        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+
+	  <Component Id="ProgramMenuInternetLinkShortcutComponent" Guid="CA8D9EC5-6BAF-49BF-A6F2-B8881D959F5A">
+		<CreateFolder/>
+		  <util:InternetShortcut Id="ProgramMenuLocalHostContestmeterShortcut" Name="Contestmeter" Target="http://localhost"/>
+		  <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+        </Component>
+    </DirectoryRef>
+    
+    <DirectoryRef Id="HelpFilesFolder">
+      <!---файл руководства пользователя-->
+      <Component Id="GeneralHelp" Guid="970DB2C9-4204-4C6D-9DB0-3F136DB2ABCD" Location="either">
+        <File Id="GeneralHelpRtf" Name="GeneralHelp.rtf" DiskId="1" KeyPath="yes" Compressed="yes" Source="Resources\Documents\GeneralHelp.rtf">
+          <Shortcut Id="GeneralHelpShortcut" Name="Руководство пользователя $(var.ProductName)" Description="Основное руководство пользователя $(var.ProductName)" WorkingDirectory="HelpFilesFolder" Directory="ProgramMenuDocumentsDir" Advertise="yes" Icon="HelpIcon.ico"/>
+        </File>
+      </Component>
+      <!--файл руководства администратора-->
+      <Component Id="AdminHelp" Guid="D982720C-3F6B-4DEB-A6C8-EAA865C1D390">
+        <File Id="AdminHelpRtf" Name="AdminHelp.rtf" DiskId="1" KeyPath="yes" Source="Resources\Documents\AdminHelp.rtf">
+          <Shortcut Id="AdminHelpShortcut" Name="Руководство администратора $(var.ProductName)" Description="Руководство администратора $(var.ProductName)" WorkingDirectory="HelpFilesFolder" Directory="ProgramMenuDocumentsDir" Advertise="yes" Icon="HelpIcon.ico"/>
+        </File>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+  <!--фрагмент с файлами IIS-->
+  <Fragment Id="IISFragment">
+    <DirectoryRef Id="INSTALLWEBALLLOCATION">
+      <!--ToDo: добавить при необходимости основные файлы сервера (в т.ч. начальную страницу и файл конфигурации)-->
+    
+      <!--компонент для добавления пула приложений-->
+      <Component Id="ContestMeterAppPoolComponent" Guid="CC0AD617-BC6C-4FE4-98AD-411424C23D5D" KeyPath="yes">
+        <!--ToDo: нужно ли такие же condition добавлять для других компонентов iis?-->
+        <!--<Condition>IISMAJORVERSION >= "#6"</Condition>-->
+        <iis:WebAppPool Id="ContestMeterAppPool" Name="contestmeter" Identity="localSystem" ManagedPipelineMode="Integrated" ManagedRuntimeVersion="v4.0"/>
+      </Component>
+    
+      <!--компонент для добавления web-сайта-->
+      <Component Id="InstallContestMeterWebsiteComponent" Guid="3C7114E2-EF12-47AB-9C40-9F8AF2CA6908" KeyPath="yes">
+        <iis:WebSite Id="ContestMeterWebsite" Description="contestmeter" Directory="INSTALLWEBALLLOCATION" AutoStart="yes" StartOnInstall="yes" ConfigureIfExists="yes" SiteId="$(var.ContestMeterWebsiteId)">
+          <iis:WebAddress Id="AllUnassigned" Port="80"/>
+          <iis:WebApplication Id="ContestMeterWebsiteApplication" Name="contestmeter" WebAppPool="ContestMeterAppPool"></iis:WebApplication>
+        </iis:WebSite>
+      </Component>
+      
+      <!--компонент для создания виртуального каталога web-сайта-->
+      <Component Id="ContestMeterVirtualDirComponent" Guid="B963927A-8AE4-4702-96A3-821B7C1932AE" KeyPath="yes">
+	    <iis:WebVirtualDir Id="ContestMeterVirtualDir" Alias="contestmeter" Directory="INSTALLWEBALLLOCATION" WebSite="ContestMeterWebsite">
+          <iis:WebDirProperties Id="ContestMeterVirtualDirProperties" AnonymousAccess="yes" Execute="yes" Read="yes" Write="no" Script="yes"/>
+        </iis:WebVirtualDir>
+      </Component>
+    
+      <!--компонент для регистрации asp.net 4.0 для заданного пула приложений-->
+      <Component Id="ASPNet4ExtensionComponent" Permanent="yes" Guid="A96CAFEF-C9AD-4309-9245-F6FC79ABE36F">
+        <CreateFolder />
+        <iis:WebServiceExtension Id="ASPNet4Extension" Group="ASP.NET v4.0.30319" Allow="yes" File="[ASPNETISAPIDLL]" Description="ASP.NET v4.0.30319" UIDeletable="no" />
+      </Component>
+
+      <!--компонент для выставления ограничений доступа к каталогу сервера contestmeter для пользователя IIS_IUSRS-->
+      <Component Id="ContestMeterIISUSRSPermissionComponent" Guid="6D22274A-1357-4A18-9231-C2793F08675D" KeyPath="yes">
+        <CreateFolder>
+          <util:PermissionEx User="IIS_IUSRS" GenericRead="yes" GenericExecute="yes"/>
+        </CreateFolder>
+      </Component>
+    </DirectoryRef>
+
+	  
+	<DirectoryRef Id="APPDATAFOLDER">
+		<!--компонент для добавления файла mdf базы данных-->
+		<Component Id="DataBaseMdfFileComponent" Guid="89023440-C726-4D15-895D-96A7E78A7F01">
+			<CreateFolder/> 
+			<File Id="DataBaseMdfFileId" Name="ContestMeterDb.mdf" Source="..\ContestMeter.Web.Site\App_Data\ContestMeterDb.mdf"/>
+			<RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="" KeyPath="yes"/>
+		</Component>
+
+		<!--компонент для добавления файла ldf базы данных-->
+		<Component Id="DataBaseLdfFileComponent" Guid="E6D05F3E-BCD8-487A-AC48-B9ED30DCDDA0">
+			<CreateFolder/>
+			<File Id="DataBaseLdfFileId" Name="ContestMeterDb_log.ldf" Source="..\ContestMeter.Web.Site\App_Data\ContestMeterDb_log.ldf"/>
+			<RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="" KeyPath="yes"/>
+		</Component>
+	</DirectoryRef> 
+    
+    <DirectoryRef Id="CONTESTMETERCONFIG">
+      <Component Id="IISConfigCreateFolderComponent" Guid="1CE62519-2FD4-4384-ABB6-B9DCDE886B38">
+        <CreateFolder/>
+      </Component>
+    </DirectoryRef>
+  
+    <DirectoryRef Id="CONTESTMETERCONFIGCHECKERS">
+      <Component Id="IISConfigCheckersCreateFolderComponent" Guid="21F45B77-FF08-4064-960F-8C0D7D99FCC2">
+        <CreateFolder/>
+      </Component>
+    </DirectoryRef>
+  
+    <DirectoryRef Id="CONTESTMETERCONFIGTESTS">
+      <Component Id="IISConfigTestsCreateFolderComponent" Guid="BE852F88-59D0-41CC-B8D0-22B7825C21DD">
+        <CreateFolder/>
+      </Component>
+    </DirectoryRef>
+
+	<DirectoryRef Id="CONTESTMETERBIN">
+      <Component Id="WindowsBaseDllFileComponent" Guid="">
+		<File Name="WindowsBase.dll" Source="Resources\Other\WindowsBase.dll"/>
+		<RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="" KeyPath="yes"/>  
+	  </Component>  
+	</DirectoryRef>
+  </Fragment>
+
+</Wix>
+
+<!--todo: 1) Добавить в папку с сервером библиотеку, которую ранее добавляли вручную.
+          2) Исправить добавление файлов базы данных.
+		  3) Сделать иконку приложения для отображения в браузере
+		  4) Сделать, чтобы выбирался пул приложений contestmeter по-умолчанию.--> 

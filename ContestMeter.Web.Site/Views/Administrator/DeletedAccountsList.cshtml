@@ -1,0 +1,138 @@
+﻿@using ContestMeter.Web.Site.Database.Entities
+@model ContestMeter.Web.Site.Models.AdministratorAccountsViewModel
+@{
+    ViewBag.Title = "Подтверждение регистрации/удаления аккаунтов";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Подтверждение регистрации/удаления аккаунтов</h2>
+
+@if (TempData["Message"] != null && TempData["Message"].ToString() != "")
+{
+    <div class="col-md-12 alert alert-success">@TempData["Message"]</div>
+}
+
+<table class="table">
+    <tr>
+        <th>
+            Роль
+        </th>
+        <th>
+            Логин
+        </th>
+        <th>
+            Email
+        </th>
+        <th>
+            Ip
+        </th>
+        <th>
+            Фамилия
+        </th>
+        <th>
+            Имя
+        </th>
+        <th>
+            Отчество
+        </th>
+        <th></th>
+    </tr>
+    
+    @foreach (var item in Model.DeletedUsers) 
+    {
+        <tr class="alert alert-warning">
+            @if (item.Roles.First().RoleId == Model.AdministratorsRoleId)
+            {
+                <td>
+                    Администратор
+                </td>
+            }
+            else
+            if (item.Roles.First().RoleId == Model.TeacherRoleId)
+            {
+                <td>
+                    Преподаватель
+                </td>
+            }
+            else
+            {
+                <td>
+                    Участник
+                </td>
+            }
+            
+            <td>
+                @Html.DisplayFor(modelItem => item.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Ip)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MiddleName)
+            </td>
+            <td>
+                @Html.ActionLink("Удалить", "DeleteAccount", new {id = item.Id}) |
+                @Html.ActionLink("Подтвердить регистрацию (восстановить)", "RestoreAccount", new {id = item.Id})
+            </td>
+        </tr>
+    }
+    @foreach (var item in Model.NotDeletedUsers)
+    {
+        <tr class="alert alert-success">
+           @if (item.Roles.First().RoleId == Model.AdministratorsRoleId)
+           {
+            <td>
+                Администратор
+            </td>
+           }
+           else
+               if (item.Roles.First().RoleId == Model.TeacherRoleId)
+               {
+                <td>
+                    Преподаватель
+                </td>
+               }
+               else
+               {
+                <td>
+                    Участник
+                </td>
+               }
+            <td>
+                @Html.DisplayFor(modelItem => item.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Ip)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MiddleName)
+            </td>
+            <td>
+                @Html.ActionLink("Удалить", "DeleteAccount", new { id = item.Id }) 
+            </td>
+        </tr>
+    }
+</table>
+
+<hr />
+<div class="col-md-12">
+    @Html.ActionLink("На главную страницу",  "Index", "Home")
+</div>

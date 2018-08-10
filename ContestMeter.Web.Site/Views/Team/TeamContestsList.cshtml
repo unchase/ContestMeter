@@ -1,0 +1,76 @@
+﻿@using ContestMeter.Web.Site.Database.Entities
+@using ContestMeter.Web.Site.Models
+@model TeamsContestsListViewModel
+
+<h2 class="alert alert-info">Контесты</h2>
+
+<table class="table">
+    <tr>
+        <th>Тип контеста</th>
+        <th>Название</th>
+        <th>Фамилия преподавателя</th>
+        <th>Имя преподавателя</th>
+        <th>Отчество преподавателя</th>
+        <th>Активный?</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.TeamContests)
+    {
+        <tr class="alert alert-success">
+            <td>
+                @Html.DisplayFor(modelItem => item.ContestsType.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Teacher.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Teacher.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Teacher.MiddleName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
+                @Html.ActionLink("Удалить", "DeleteContests", "Team", new { teamId = Model.TeamId, id = item.Id }, null)
+            </td>
+        </tr>
+    }
+
+    @foreach (var item in Model.Contests)
+    {
+        <tr class="alert alert-warning">
+            <td>
+                @Html.DisplayFor(modelItem => item.ContestsType.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Teacher.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Teacher.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Teacher.MiddleName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
+                @Html.ActionLink("Добавить", "AddContests", "Team", new { teamId = Model.TeamId, id = item.Id }, null)
+            </td>
+        </tr>
+    }
+</table>
+
+
+
+
+

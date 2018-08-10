@@ -1,0 +1,56 @@
+﻿@using ContestMeter.Web.Site.Database.Entities
+@model IEnumerable<NewsItem>
+@{
+    ViewBag.Title = "Редактирование новостей";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Редактирование новостей</h2>
+
+@if (TempData["Message"] != null && TempData["Message"].ToString() != "")
+{
+    <div class="col-md-12 alert alert-info">@TempData["Message"]</div>
+}
+
+<p class="col-md-12">
+    @Html.ActionLink("Добавить", "NewsItemCreate")
+</p>
+
+<table class="table">
+    <tr>
+        <th>
+            Дата создания
+        </th>
+        <th>
+            Заголовок
+        </th>
+        <th>
+            Текст
+        </th>
+        <th></th>
+    </tr>
+    
+    @foreach (var item in Model) 
+    {
+        <tr class="alert alert-warning">
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Text)
+            </td>
+            <td>
+                @Html.ActionLink("Редактировать", "NewsItemEdit", new { id=item.Id }) |
+                @Html.ActionLink("Удалить", "NewsItemDelete", new { id=item.Id })
+            </td>
+        </tr>
+    }
+</table>
+
+<hr />
+<div class="col-md-12">
+    @Html.ActionLink("На главную страницу",  "Index", "Home")
+</div>

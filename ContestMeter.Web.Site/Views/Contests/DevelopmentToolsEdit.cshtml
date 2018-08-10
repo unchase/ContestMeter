@@ -1,0 +1,58 @@
+﻿@using ContestMeter.Web.Site.Models
+@model ContestsDevelopmentToolsEditViewModel
+@{
+    ViewBag.Title = "Редактирование компилятора";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Редактирование компилятора</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal col-md-12 alert alert-warning">
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.DevelopmentToolId)
+        @Html.HiddenFor(model => model.ContestId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.Name)
+                @Html.ValidationMessageFor(model => model.Name)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CompileCommand, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.CompileCommand)
+                @Html.ValidationMessageFor(model => model.CompileCommand)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CommandArgs, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.CommandArgs)
+                @Html.ValidationMessageFor(model => model.CommandArgs)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-4 col-md-8">
+                <input type="submit" value="Сохранить" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Вернуться к списку компиляторов",  "Edit", new { id = Model.ContestId })
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

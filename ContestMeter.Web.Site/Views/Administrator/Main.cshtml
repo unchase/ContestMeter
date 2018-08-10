@@ -1,0 +1,96 @@
+﻿@using ContestMeter.Web.Site.Models
+@model AdministratorMainViewModel
+@{
+    ViewBag.Title = "Администрирование";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Основные настройки</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    if (TempData["Message"] != null && TempData["Message"].ToString() != "")
+    {
+        <div class="col-md-12 alert alert-success">@TempData["Message"]</div>
+        <br />
+    }
+
+    <div class="form-horizontal alert alert-warning">
+        @Html.ValidationSummary(true)
+        
+        <div class="form-group">
+            @Html.LabelFor(model => model.AllowRegister, "Включить регистрацию участников?", new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.AllowRegister)
+                @Html.ValidationMessageFor(model => model.AllowRegister)
+            </div>
+        </div>
+        
+        <div class="form-group">
+            @Html.LabelFor(model => model.AllowRegisterTeacher, "Включить регистрацию учителей?", new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.AllowRegisterTeacher)
+                @Html.ValidationMessageFor(model => model.AllowRegisterTeacher)
+            </div>
+        </div>
+        <hr />
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PostedSolutionsRootFolder, "Временный каталог для присылаемых решений", new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.PostedSolutionsRootFolder)
+                @Html.ValidationMessageFor(model => model.PostedSolutionsRootFolder)
+            </div>
+        </div>
+        
+        <div class="form-group">
+            @Html.LabelFor(model => model.SiteConfigFolder, "Каталог для тестов и чекеров", new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.SiteConfigFolder)
+                @Html.ValidationMessageFor(model => model.SiteConfigFolder)
+            </div>
+        </div>
+        <hr />
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.UseRecaptcha, "Включить капчу при регистрации?", new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.UseRecaptcha)
+                @Html.ValidationMessageFor(model => model.UseRecaptcha)
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.RecaptchaPrivateKey, "Приватный ключ Recaptcha", new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.RecaptchaPrivateKey)
+                @Html.ValidationMessageFor(model => model.RecaptchaPrivateKey)
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.RecaptchaPublicKey, "Публичный ключ Recaptcha", new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.RecaptchaPublicKey)
+                @Html.ValidationMessageFor(model => model.RecaptchaPublicKey)
+            </div>
+        </div>
+        @*ToDo: добавить дополнительные настройки для администратора *@
+        
+        
+        <div class="form-group">
+            <div class="col-md-offset-4 col-md-8">
+                <input type="submit" value="Сохранить" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<hr />
+<div class="col-md-12">
+    @Html.ActionLink("На главную страницу",  "Index", "Home")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,24 @@
+{
+	"_devTools":[
+				 {"CommandArgs":"-CC \"{0}\"","CompileCommand":"dcc32","IsExeFile":false,"Name":"Borland Delphi 7.0"},
+				 {"CommandArgs":"\"{0}\"","CompileCommand":"fpc","IsExeFile":false,"Name":"Free Pascal 2.4.0"},
+				 {"CommandArgs":"\/O2 \/I\"C:\\Program Files\\Microsoft Visual Studio 11.0\\VC\\include\" \/TC \"{0}\" \/link \/LIBPATH:\"C:\\Program Files\\Microsoft Visual Studio 11.0\\VC\\lib\" \/LIBPATH:\"C:\\Program Files\\Microsoft Visual Studio .NET 2003\\Vc7\\lib\"","CompileCommand":"cl","IsExeFile":false,"Name":"Visual С 2005"},
+				 {"CommandArgs":"\/O2 \/I\"C:\\Program Files\\Microsoft Visual Studio 11.0\\VC\\include\" \/TC \"{0}\" \/link \/LIBPATH:\"C:\\Program Files\\Microsoft Visual Studio 11.0\\VC\\lib\" \/LIBPATH:\"C:\\Program Files\\Microsoft Visual Studio .NET 2003\\Vc7\\lib\"","CompileCommand":"cl","IsExeFile":false,"Name":"GNU С 4.4.0 (MinGW)"},
+				 {"CommandArgs":"\/O2 \/I\"C:\\Program Files\\Microsoft Visual Studio 11.0\\VC\\include\" \/EHs \/TP  \"{0}\" \/link \/LIBPATH:\"C:\\Program Files\\Microsoft Visual Studio 11.0\\VC\\lib\" \/LIBPATH:\"C:\\Program Files\\Microsoft Visual Studio .NET 2003\\Vc7\\lib\"","CompileCommand":"cl","IsExeFile":false,"Name":"Visual C++ 2005"},
+				 {"CommandArgs":"\/O2 \/I\"C:\\Program Files\\Microsoft Visual Studio 11.0\\VC\\include\" \/EHs \/TP  \"{0}\" \/link \/LIBPATH:\"C:\\Program Files\\Microsoft Visual Studio 11.0\\VC\\lib\" \/LIBPATH:\"C:\\Program Files\\Microsoft Visual Studio .NET 2003\\Vc7\\lib\"","CompileCommand":"cl","IsExeFile":false,"Name":"GNU C++ 4.4.0 (MinGW)"},
+				 {"CommandArgs":"\"{0}\"","CompileCommand":"vbc","IsExeFile":false,"Name":"Visual Basic 2005"},{"CommandArgs":"{0}","CompileCommand":"bpc","IsExeFile":false,"Name":"Borland Pascal 7.0"},
+				 {"CommandArgs":"-LD:\\BORLANDC\\LIB -ID:\\BORLANDC\\INCLUDE -ml {0}","CompileCommand":"bcc","IsExeFile":false,"Name":"Borland С 3.1"},
+				 {"CommandArgs":"-LD:\\BORLANDC\\LIB -ID:\\BORLANDC\\INCLUDE -ml {0}","CompileCommand":"bcc","IsExeFile":false,"Name":"Borland С++ 3.1"}
+				],
+	"_tasks":[
+				 {"CheckerName":"game-check.exe","ExecutableName":"game-1","Name":"Ролевая игра","TestsFolder":"game","TimeLimit":2,"Weight":5},
+				 {"CheckerName":"wheel-check.exe","ExecutableName":"wheel-1","Name":"Колесо Фортуны","TestsFolder":"wheel","TimeLimit":10,"Weight":2},
+				 {"CheckerName":"format-check.exe","ExecutableName":"format-1","Name":"Форматирование текста","TestsFolder":"format","TimeLimit":2,"Weight":5},
+				 {"CheckerName":"space-check.exe","ExecutableName":"space-1","Name":"Космические исследования","TestsFolder":"space","TimeLimit":5,"Weight":2},
+				 {"CheckerName":"right-check.exe","ExecutableName":"right","Name":"Всегда права","TestsFolder":"right","TimeLimit":2,"Weight":1},
+				 {"CheckerName":"chess-check.exe","ExecutableName":"chess","Name":"Шахматная доска","TestsFolder":"chess","TimeLimit":4,"Weight":2},
+				 {"CheckerName":"shooting-check.exe","ExecutableName":"shooting","Name":"Чемпионат по стрельбе","TestsFolder":"shooting","TimeLimit":4,"Weight":5},
+				 {"CheckerName":"divisors-check.exe","ExecutableName":"divisors","Name":"Делители","TestsFolder":"divisors","TimeLimit":4,"Weight":2},
+				 {"CheckerName":"house-check.exe","ExecutableName":"house","Name":"Дом у дороги","TestsFolder":"house","TimeLimit":4,"Weight":2}
+			]
+}

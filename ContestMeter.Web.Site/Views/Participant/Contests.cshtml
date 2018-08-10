@@ -1,0 +1,85 @@
+﻿@using ContestMeter.Web.Site.Models
+@model ParticipantContestsViewModel
+@{
+    ViewBag.Title = "Список контестов";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["Message"] != null && TempData["Message"].ToString() != "")
+{
+    <br />
+    <div class="col-md-12 alert alert-danger">@TempData["Message"]</div>
+    <br />
+}
+
+<h2 class="alert alert-success">Активные контесты</h2>
+
+<div>
+    <table class="table">
+        <tr>
+            <th>Тип контеста
+            </th>
+            <th>Преподаватель
+            </th>
+            <th>Контест
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model.Contests.Where(c => c.IsActive == true))
+        {
+            <tr class="alert alert-warning">
+                <td>
+                    @Html.DisplayFor(modelItem => item.ContestsType.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Teacher.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.ActionLink("Участвовать", "Participate", new { id = item.Id, currentTaskNumber = 0 }) |
+                    @Html.ActionLink("Информация", "Information", new { id = item.Id })
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+<h2 class="alert alert-danger">Неактивные контесты</h2>
+
+<div>
+    <table class="table">
+        <tr>
+            <th>Тип контеста
+            </th>
+            <th>Преподаватель
+            </th>
+            <th>Контест
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model.Contests.Where(c => c.IsActive == false))
+        {
+            <tr class="alert alert-warning">
+                <td>
+                    @Html.DisplayFor(modelItem => item.ContestsType.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Teacher.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.ActionLink("Информация", "Information", new { id = item.Id })
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+
+

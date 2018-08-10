@@ -1,0 +1,62 @@
+﻿@using ContestMeter.Web.Site.Database.Entities
+@using ContestMeter.Web.Site.Models
+@model ContestsTasksListViewModel
+
+<h2 class="alert alert-info">Задачи</h2>
+
+<p>
+    @Html.ActionLink("Добавить", "TasksCreate", "Contests", new { id = Model.ContestId }, null)
+</p>
+<table class="table">
+    <tr>
+        <th>Название задачи</th>
+        <th>Краткое название</th>
+        <th>Проверяющая программа (с расширением)</th>
+        <th>Папка с тестами</th>
+        <th>Предел выполнения по времени (в сек.)</th>
+        <th>Цена одного теста</th>
+        <th>Максимальный размер исходника (в байтах). 0 - не ограничен</th>
+        <th>Максимальный размер используемой памяти (в байтах). 0 - не ограничен</th>
+        <th>Рейтинг задачи</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.Tasks)
+    {
+        <tr class="alert alert-warning">
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ExecutableName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CheckerName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TestsFolder)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TimeLimit)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Weight)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaxSourceSize)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaxMemorySize)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rating)
+            </td>
+            <td>
+                @Html.ActionLink("Редактировать", "TasksEdit", "Contests", new { id = item.Id }, null) |
+                @Html.ActionLink("Удалить", "TasksDelete", "Contests", new { id = item.Id }, null)
+            </td>
+        </tr>
+    }
+</table>
+
+

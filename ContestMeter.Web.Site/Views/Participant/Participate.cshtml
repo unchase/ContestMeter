@@ -1,0 +1,47 @@
+﻿@using ContestMeter.Web.Site.Models
+@model ParticipantParticipateViewModel
+@{
+    ViewBag.Title = "Участие в контесте";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("Participate", "Participant", FormMethod.Post, new {enctype = "multipart/form-data"}))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="col-md-12">
+            @Html.HiddenFor(model => model.ContestId)
+    
+            @Html.ValidationSummary()
+
+            <div id="taskPartial" class="col-md-12">
+                @Html.Action("TaskPartial", new {contestId = Model.ContestId, currentTaskNumber = Model.CurrentTaskNumber})
+            </div>
+            <br />
+        
+            <div class="col-md-12">
+                <input type="submit" value="Отправить решение" class="btn btn-default" />
+            </div>
+            <br />
+
+            <div class="col-lg-offset-3 col-md-9">
+                <ul class="pagination">
+                    @for (int i = 0; i < Model.Tasks.Count(); i++)
+                    {
+                        <li>@Ajax.ActionLink((i + 1).ToString(), "TaskPartial", new {contestId = Model.ContestId, currentTaskNumber = i}, new AjaxOptions {UpdateTargetId = "taskPartial"}, new {id = "task"})</li>
+                    }
+                </ul>
+            </div>
+            
+            <hr />
+            <div class="col-md-12">
+                @Html.ActionLink("Вернуться к списку контестов", "Contests")
+            </div>
+        </div>
+    </div>
+    
+}
+
+@Scripts.Render("~/scripts/jquery-2.1.1.min.js")
+@Scripts.Render("~/scripts/jquery.unobtrusive-ajax.min.js")

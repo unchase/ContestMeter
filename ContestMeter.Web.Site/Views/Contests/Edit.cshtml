@@ -1,0 +1,86 @@
+﻿@using ContestMeter.Web.Site.Models
+@model ContestsEditViewModel
+
+@{
+    ViewBag.Title = "Редактировать контест";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Редактировать контест <b>"@Model.Name"</b></h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.ContestId)
+        @Html.HiddenFor(model => model.TeacherId)
+        @if (TempData["Message"] != null && TempData["Message"].ToString() != "")
+        {
+            <br />
+            <div class="col-md-12 alert alert-danger">@TempData["Message"]</div>
+            <br />
+        }
+        
+        <div class="alert alert-warning">
+            <div class="form-group">
+                @Html.Label("Тип контеста", new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.ContestsTypeId, Model.ContestsTypes, String.Empty)
+                    @Html.ValidationMessageFor(model => model.ContestsTypeId)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Name, "Название", new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Name)
+                    @Html.ValidationMessageFor(model => model.Name)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.IsActive, "Активный?", new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.IsActive)
+                    @Html.ValidationMessageFor(model => model.IsActive)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Сохранить" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-12">
+                @Html.Action("TeachersList", "Contests", new { id = Model.ContestId })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-12">
+                @Html.Action("TasksList", "Contests", new { id = Model.ContestId })
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-md-12">
+                @Html.Action("DevelopmentToolsList", "Contests", new { id = Model.ContestId })
+            </div>
+        </div>
+    </div>
+}
+
+<hr />
+<div>
+    @Html.ActionLink("Вернуться к списку контестов", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

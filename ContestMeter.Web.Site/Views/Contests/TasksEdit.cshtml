@@ -1,0 +1,106 @@
+﻿@using ContestMeter.Web.Site.Models
+@model ContestsTasksEditViewModel
+@{
+    ViewBag.Title = "Редактирование задачи";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Редактирование задачи</h2>
+
+
+@using (Html.BeginForm("TasksEdit", "Contests", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal col-md-12 alert alert-warning">
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.TaskId)
+        @Html.HiddenFor(model => model.ContestId)
+        @Html.HiddenFor(model => model.Rating)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.Name)
+                @Html.ValidationMessageFor(model => model.Name)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ExecutableName, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.ExecutableName)
+                @Html.ValidationMessageFor(model => model.ExecutableName)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CheckerName, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.CheckerName)
+                @Html.ValidationMessageFor(model => model.CheckerName)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TestsFolder, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.TestsFolder)
+                @Html.ValidationMessageFor(model => model.TestsFolder)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TimeLimit, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.TimeLimit)
+                @Html.ValidationMessageFor(model => model.TimeLimit)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Weight, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.Weight)
+                @Html.ValidationMessageFor(model => model.Weight)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.MaxSourceSize, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.MaxSourceSize)
+                @Html.ValidationMessageFor(model => model.MaxSourceSize)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.MaxMemorySize, new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                @Html.EditorFor(model => model.MaxMemorySize)
+                @Html.ValidationMessageFor(model => model.MaxMemorySize)
+            </div>
+        </div>
+        
+        <div class="form-group">
+            @Html.Label("Загрузить файл с описанием задачи (в формате pdf)", new { @class = "control-label col-md-4" })
+            <div class="col-md-8">
+                <input type="file" name="fileUpload" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-4 col-md-8">
+                <input type="submit" value="Сохранить" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Вернуться к списку задач", "Edit", new { id = Model.ContestId })
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

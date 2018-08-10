@@ -1,0 +1,50 @@
+﻿@using ContestMeter.Web.Site.Database.Entities
+@using ContestMeter.Web.Site.Models
+@model ContestsExceptionsLogsViewModel
+@{
+    ViewBag.Title = "Журнал ошибок";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Журнал ошибок контеста "@Model.ContestName"</h2>
+
+@using (Html.BeginForm())
+{
+    <table class="table">
+        <tr>
+            <th>
+                Участник
+            </th>
+            <th>
+                Дата создания
+            </th>
+            <th>
+                Текст лога
+            </th>
+            <th></th>
+        </tr>
+    
+        @foreach (ExceptionsLog el in Model.ExceptionsLogs) 
+        {
+            <tr class="alert alert-danger">
+                <td>
+                    @el.User.UserName
+                </td>
+                <td>
+                    @el.CreatedDate.ToString()
+                </td>
+                <td>
+                    @Html.DisplayFor(item => el.Text)
+                </td>
+                <td>
+                    @Html.ActionLink("Удалить", "DeleteExceptionsLog", new {contestId = el.ContestId, id = el.Id})
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+<hr/>
+<div>
+    @Html.ActionLink("Вернуться к списку контестов", "Index")
+</div>

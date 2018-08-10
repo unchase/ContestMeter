@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>3.8</ProductVersion>
+    <ProjectGuid>91611683-b53c-45cc-a2d3-95d58b6f6f2d</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>ContestMeter.Setup</OutputName>
+    <OutputType>Package</OutputType>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <OutputPath>dotNetInstaller2.3\Bin\ContestMeterSetup\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug;SourcePath=$(ProjectDir)..\ContestMeter.Web.Site\obj\Release\Package\PackageTmp</DefineConstants>
+    <Cultures>ru-RU</Cultures>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="AdditionalUIDialogs.wxs" />
+    <Compile Include="OutputFiles.wxs" />
+    <Compile Include="Product.wxs" />
+    <Compile Include="WixUI_ContestMeterMondo.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUtilExtension">
+      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
+      <Name>WixUtilExtension</Name>
+    </WixExtension>
+    <WixExtension Include="WixSqlExtension">
+      <HintPath>$(WixExtDir)\WixSqlExtension.dll</HintPath>
+      <Name>WixSqlExtension</Name>
+    </WixExtension>
+    <WixExtension Include="WixNetFxExtension">
+      <HintPath>$(WixExtDir)\WixNetFxExtension.dll</HintPath>
+      <Name>WixNetFxExtension</Name>
+    </WixExtension>
+    <WixExtension Include="WixIIsExtension">
+      <HintPath>$(WixExtDir)\WixIIsExtension.dll</HintPath>
+      <Name>WixIIsExtension</Name>
+    </WixExtension>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="dotNetInstaller2.3\Bin\CabLib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\ContestMeterSetup\Banner.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\ContestMeterSetup\Banner.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\ContestMeterSetup\Banner.psd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\ContestMeterSetup\Configuration.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\ContestMeterSetup\InstallIISBeforeWinServer2008Components.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\ContestMeterSetup\InstallIISWin7x64Components.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\dotNetInstaller.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\dotNetInstaller.pdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\htmlInstaller.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\htmlInstaller.pdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\InstallerEditor.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\InstallerLib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\InstallerLinker.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\MakeExeSetup.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\Microsoft.VC80.CRT.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\msvcm80.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\msvcp80.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\msvcr80.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\SourceGrid2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\SourceLibrary.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\unicows.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Bin\Vestris.ResourceLib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotNetInstaller2.3\Doc\dotNetInstaller.chm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Documents\AdminHelp.rtf" />
+    <Content Include="Resources\Documents\GeneralHelp.rtf" />
+    <Content Include="Resources\Icons\ContestMeterIcon.ico" />
+    <Content Include="Resources\Icons\ContestMeterUtilsIcon.ico" />
+    <Content Include="Resources\Icons\Symbol-Help.ico" />
+    <Content Include="Resources\Other\ContestMeterDb.sql" />
+    <Content Include="Resources\Other\WindowsBase.dll" />
+    <Content Include="Resources\Utilities\InstallIISBeforeWinServer2008Components.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Utilities\InstallIISWin7x64Components.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Variables.wxi" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="dotNetInstaller2.3" />
+    <Folder Include="dotNetInstaller2.3\Bin" />
+    <Folder Include="dotNetInstaller2.3\Bin\ContestMeterSetup" />
+    <Folder Include="dotNetInstaller2.3\Doc" />
+    <Folder Include="Resources" />
+    <Folder Include="Resources\Documents" />
+    <Folder Include="Resources\Icons" />
+    <Folder Include="Resources\Other" />
+    <Folder Include="Resources\Utilities" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="IIsExtension_ru-ru.wxl" />
+    <EmbeddedResource Include="SqlExtension_ru-ru.wxl" />
+    <EmbeddedResource Include="UtilExtension_ru-ru.wxl" />
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" />
+  <PropertyGroup>
+    <PreBuildEvent>copy "$(ProjectDir)..\ContestMeter.Web.Site\bin\System.Web.Mvc.dll"  "$(ProjectDir)..\ContestMeter.Web.Site\obj\Release\Package\PackageTmp\bin"
+"%25WIX%25\bin\heat.exe" dir "$(ProjectDir)..\ContestMeter.Web.Site\obj\Release\Package\PackageTmp" -dr INSTALLWEBALLLOCATION -var var.SourcePath -cg SourceComponentGroup -o "$(ProjectDir)OutputFiles.wxs" -gg -srd -sfrag</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>copy /y $(ProjectDir)dotNetInstaller2.3\Bin\ContestMeterSetup\ru-RU\ContestMeter.Setup.msi $(ProjectDir)dotNetInstaller2.3\Bin\ContestMeterSetup\ContestMeter.Setup.msi
+cd $(ProjectDir)Resources\Utilities
+copy /y InstallIISBeforeWinServer2008Components.bat $(ProjectDir)dotNetInstaller2.3\Bin\ContestMeterSetup\InstallIISBeforeWinServer2008Components.bat
+copy /y InstallIISWin7x64Components.bat $(ProjectDir)dotNetInstaller2.3\Bin\ContestMeterSetup\InstallIISWin7x64Components.bat
+cd $(ProjectDir)dotNetInstaller2.3\Bin
+
+
+echo off
+%40cls
+%40set currentPath=%25cd%25
+%40if not exist ContestMeterSetup\nul goto CMPATHNOTEXISTS
+%40path %25PATH%25%3b%25currentPath%25
+echo on
+InstallerLinker.exe /Output:"ContestMeterSetup\ContestMeterSetup.exe" /Template:"dotNetInstaller.exe" /Configuration:"ContestMeterSetup\Configuration.xml" /Verbose+ /Banner:"ContestMeterSetup\Banner.bmp"
+%40goto EXIT
+
+:CMPATHNOTEXISTS
+%40echo "%25currentPath%25\ContestMeterSetup" does not exists
+%40goto EXIT
+
+:EXIT
+%40PAUSE
+
+mkdir $(ProjectDir)bin
+mkdir $(ProjectDir)bin\$(ConfigurationName)
+copy /y $(ProjectDir)dotNetInstaller2.3\Bin\ContestMeterSetup\ContestMeterSetup.exe $(ProjectDir)bin\$(ConfigurationName)</PostBuildEvent>
+  </PropertyGroup>
+  <!--
+	To modify your build process, add your task inside one of the targets below and uncomment it.
+	Other similar extension points exist, see Wix.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+  <Target Name="AfterBuild">
+  </Target>-->
+</Project>

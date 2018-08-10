@@ -1,0 +1,99 @@
+﻿@using ContestMeter.Web.Site.Database.Entities
+@using ContestMeter.Web.Site.Models
+@model ParticipantInformationViewModel
+@{
+    ViewBag.Title = "Информация о контесте";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Информация о контесте "@Model.Contest.Name"</h2>
+
+@using (Html.BeginForm())
+{
+    if (TempData["Message"] != null && TempData["Message"].ToString() != "")
+    {
+        <br />
+        <div class="col-md-12 alert alert-danger">@TempData["Message"]</div>
+        <br />
+    }
+
+    <table class="table">
+        <tr>
+            <th>
+                Участник
+            </th>
+            <th>
+                Дата проверки решения
+            </th>
+            <th>
+                Задача
+            </th>
+            <th>
+                Компилятор
+            </th>
+            <th>
+                Проваленные запуски
+            </th>
+            <th>
+                Проваленные тесты
+            </th>
+            <th>
+                Баллы
+            </th>
+            <th></th>
+            <th></th>
+        </tr>
+    
+        @foreach (UserAttempt ua in Model.UserAttempts) 
+        {
+            <tr class="alert alert-info">
+                <td>
+                    @ua.User.UserName
+                </td>
+                <td>
+                    @ua.CreatedDate.ToString()
+                </td>
+                <td>
+                    @Html.DisplayFor(item => ua.Task.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(item => ua.DevelopmentTool.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(item => ua.FailedRuns)
+                </td>
+                <td>
+                    @Html.DisplayFor(item => ua.FailedChecks)
+                </td>
+                <td>
+                    @Html.DisplayFor(item => ua.Score)
+                </td>
+                
+                @if (!User.IsInRole("participant"))
+                {
+                    <td>
+                        @Html.ActionLink("Последнее решение", "DownloadLastPostedSolution", new { id = ua.Id })
+                    </td>
+                    <td>
+                        @Html.ActionLink("Удалить", "DeleteUserAttempt", new {contestId = ua.ContestId, id = ua.Id})
+                    </td>
+                }
+                else
+                {
+                    <td></td>
+                }
+            </tr>
+        }
+    </table>
+}
+
+<div>
+    @if (User.IsInRole("participant"))
+    {
+        @Html.ActionLink("Вернуться к списку контестов", "Contests")
+    }
+    else
+    {
+        @Html.ActionLink("Вернуться к списку контестов", "Index", "Contests")
+    }
+</div>

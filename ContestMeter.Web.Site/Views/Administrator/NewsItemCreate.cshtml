@@ -1,0 +1,49 @@
+﻿@using ContestMeter.Web.Site.Models
+@model AdministratorNewsItemCreateViewModel
+@{
+    ViewBag.Title = "Добавление новости";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="alert alert-info">Добавление новости</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal alert alert-warning">
+        @Html.ValidationSummary(true)
+
+        <div class="form-group">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Title, new { @class = "control-label col-md-4" })
+                <div class="col-md-8">
+                    @Html.EditorFor(model => model.Title)
+                    @Html.ValidationMessageFor(model => model.Title)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Text, new { @class = "control-label col-md-4" })
+                <div class="col-md-8">
+                    @Html.TextAreaFor(model => model.Text)
+                    @Html.ValidationMessageFor(model => model.Text)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-4 col-md-8">
+                    <input type="submit" value="Добавить" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="col-md-12">
+    @Html.ActionLink("Вернуться к списку новостей", "News")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

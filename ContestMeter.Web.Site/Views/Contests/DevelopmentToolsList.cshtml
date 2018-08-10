@@ -1,0 +1,36 @@
+﻿@using ContestMeter.Web.Site.Database.Entities
+@using ContestMeter.Web.Site.Models
+@model ContestsDevelopmentToolsListViewModel
+
+<h2 class="alert alert-info">Компиляторы</h2>
+
+<p>
+    @Html.ActionLink("Добавить", "DevelopmentToolsCreate", "Contests", new { id = Model.ContestId }, null)
+</p>
+<table class="table">
+    <tr>
+        <th>Название</th>
+        <th>Исполняемый файл</th>
+        <th> Шаблон командной строки</th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model.DevelopmentTools) {
+    <tr class="alert alert-warning">
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.CompileCommand)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.CommandArgs)
+        </td>
+        <td>
+            @Html.ActionLink("Редактировать", "DevelopmentToolsEdit", "Contests", new { id=item.Id }, null) |
+            @Html.ActionLink("Удалить", "DevelopmentToolsDelete", "Contests", new { id=item.Id }, null)
+        </td>
+    </tr>
+}
+
+</table>
