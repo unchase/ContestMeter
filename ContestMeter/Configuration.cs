@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Security.Cryptography;
-using System.ComponentModel;
-using System.Runtime.Serialization;
-using System.Reflection;
+﻿using System.Runtime.Serialization;
 using System.Collections.ObjectModel;
-using System.Net;
-using System.Data.SqlClient;
 
 namespace ContestMeter.Common
 {
@@ -159,7 +149,7 @@ namespace ContestMeter.Common
 
         public DeveloperTool AddNewTool()
         {
-            DeveloperTool tool = new DeveloperTool();
+            var tool = new DeveloperTool();
             _devTools.Add(tool);
             return tool;
         }

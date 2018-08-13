@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace ContestMeter.Web.Site.Database.Entities
@@ -12,9 +10,9 @@ namespace ContestMeter.Web.Site.Database.Entities
     {
         public ApplicationUser()
         {
-            this.ExceptionsLogs = new HashSet<ExceptionsLog>();
-            this.PostedSolutions = new HashSet<PostedSolution>();
-            this.UserAttempts = new HashSet<UserAttempt>();
+            ExceptionsLogs = new HashSet<ExceptionsLog>();
+            PostedSolutions = new HashSet<PostedSolution>();
+            UserAttempts = new HashSet<UserAttempt>();
         }
 
         public Guid? UserInfoId { get; set; }

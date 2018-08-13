@@ -1,66 +1,62 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace ContestMeter.Web.Site.Queue
 {
     public class CheckSolutionQueue : IDisposable
     {
-        private ConcurrentQueue<Task> Tasks;
+        private readonly ConcurrentQueue<Task> _tasks;
 
-        private int runningTasksCount;
+        private int _runningTasksCount;
 
-        private int wokringInterval;
+        private int _wokringInterval;
 
-        private CancellationTokenSource cancelToken;
+        private readonly CancellationTokenSource _cancelToken;
 
         public CheckSolutionQueue(int workingIntervalMillisecond, int maxRunningTasks)
         {
-            runningTasksCount = 0;
+            _runningTasksCount = 0;
 
-            Tasks = new ConcurrentQueue<Task>();
-            wokringInterval= workingIntervalMillisecond;
+            _tasks = new ConcurrentQueue<Task>();
+            _wokringInterval= workingIntervalMillisecond;
 
-            cancelToken = new CancellationTokenSource();
-            System.Threading.Tasks.Task.Factory.StartNew(() =>
+            _cancelToken = new CancellationTokenSource();
+            Task.Factory.StartNew(() =>
             {
                 while (true)
                 {
 
-                    if (Tasks.IsEmpty)
-                        Thread.Sleep(wokringInterval);
+                    if (_tasks.IsEmpty)
+                        Thread.Sleep(_wokringInterval);
                     else
                     {
-                        if (runningTasksCount == maxRunningTasks)
+                        if (_runningTasksCount == maxRunningTasks)
                         {
                             Thread.Sleep(100);
                             continue;
                         }
-                        Task task;
-                        Tasks.TryDequeue(out task);
-                        runningTasksCount++;
+
+                        _tasks.TryDequeue(out var task);
+                        _runningTasksCount++;
                         task.Start();
-                        task.ContinueWith((x) => runningTasksCount--);
+                        task.ContinueWith(x => _runningTasksCount--);
                     }
-                    if (cancelToken.IsCancellationRequested)
+                    if (_cancelToken.IsCancellationRequested)
                         break;
                 }
-            }, cancelToken.Token);
+            }, _cancelToken.Token);
         }
 
         public void AddTask(Task task)
         {
-            Tasks.Enqueue(task);
+            _tasks.Enqueue(task);
         }
 
         public void Dispose()
         {
-            cancelToken.Cancel();
+            _cancelToken.Cancel();
         }
     }
 }

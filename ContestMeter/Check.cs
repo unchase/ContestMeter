@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ContestMeter
 {
@@ -17,7 +14,7 @@ namespace ContestMeter
 
         public static void NotNullOrEmpty(string value, string name)
         {
-            if (String.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value))
             {
                 throw new ArgumentNullException(name);
             }

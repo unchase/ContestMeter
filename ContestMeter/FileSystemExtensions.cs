@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Runtime.Serialization;
 
@@ -11,7 +8,7 @@ namespace ContestMeter
     {
         public static T LoadJson<T>(this IFileSystem fs, string url)
         {
-            T result = default(T);
+            var result = default(T);
             using (var ms = new MemoryStream())
             {
                 fs.Download(url, ms);
@@ -65,7 +62,7 @@ namespace ContestMeter
                 throw new ArgumentException("Destination stream should be writable.");
             }
 
-            int len = (int)1024 * 1024;
+            var len = (int)1024 * 1024;
             var buffer = new byte[len];
 
             while (len > 0)

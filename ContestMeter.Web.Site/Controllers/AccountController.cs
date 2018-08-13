@@ -81,8 +81,7 @@ namespace ContestMeter.Web.Site.Controllers
         [AllowAnonymous]
         public ActionResult RegisterTeacher()
         {
-            bool useRecaptcha;
-            if (bool.TryParse(ConfigurationManager.AppSettings["UseRecaptcha"], out useRecaptcha))
+            if (bool.TryParse(ConfigurationManager.AppSettings["UseRecaptcha"], out var useRecaptcha))
             {
                 var model = new RegisterTeacherViewModel
                 {
@@ -117,13 +116,13 @@ namespace ContestMeter.Web.Site.Controllers
                 {
                     if (model.UseRecaptcha)
                     {
-                        RecaptchaVerificationHelper recaptchaHelper = this.GetRecaptchaVerificationHelper();
-                        if (String.IsNullOrEmpty(recaptchaHelper.Response))
+                        var recaptchaHelper = this.GetRecaptchaVerificationHelper();
+                        if (string.IsNullOrEmpty(recaptchaHelper.Response))
                         {
                             ModelState.AddModelError("", "Ответ капчи не может быть пустым.");
                             return View(model);
                         }
-                        RecaptchaVerificationResult recaptchaResult =
+                        var recaptchaResult =
                             await recaptchaHelper.VerifyRecaptchaResponseTaskAsync();
                         if (recaptchaResult != RecaptchaVerificationResult.Success)
                         {
@@ -174,8 +173,7 @@ namespace ContestMeter.Web.Site.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
-            bool useRecaptcha;
-            if (bool.TryParse(ConfigurationManager.AppSettings["UseRecaptcha"], out useRecaptcha))
+            if (bool.TryParse(ConfigurationManager.AppSettings["UseRecaptcha"], out var useRecaptcha))
             {
                 var model = new RegisterViewModel
                 {
@@ -210,13 +208,13 @@ namespace ContestMeter.Web.Site.Controllers
                 {
                     if (model.UseRecaptcha)
                     {
-                        RecaptchaVerificationHelper recaptchaHelper = this.GetRecaptchaVerificationHelper();
-                        if (String.IsNullOrEmpty(recaptchaHelper.Response))
+                        var recaptchaHelper = this.GetRecaptchaVerificationHelper();
+                        if (string.IsNullOrEmpty(recaptchaHelper.Response))
                         {
                             ModelState.AddModelError("", "Ответ капчи не может быть пустым.");
                             return View(model);
                         }
-                        RecaptchaVerificationResult recaptchaResult =
+                        var recaptchaResult =
                             await recaptchaHelper.VerifyRecaptchaResponseTaskAsync();
                         if (recaptchaResult != RecaptchaVerificationResult.Success)
                         {
@@ -322,16 +320,8 @@ namespace ContestMeter.Web.Site.Controllers
         [ValidateAntiForgeryToken]
         public async System.Threading.Tasks.Task<ActionResult> Disassociate(string loginProvider, string providerKey)
         {
-            ManageMessageId? message = null;
-            IdentityResult result = await UserManager.RemoveLoginAsync(User.Identity.GetUserId(), new UserLoginInfo(loginProvider, providerKey));
-            if (result.Succeeded)
-            {
-                message = ManageMessageId.RemoveLoginSuccess;
-            }
-            else
-            {
-                message = ManageMessageId.Error;
-            }
+            var result = await UserManager.RemoveLoginAsync(User.Identity.GetUserId(), new UserLoginInfo(loginProvider, providerKey));
+            ManageMessageId? message = result.Succeeded ? ManageMessageId.RemoveLoginSuccess : ManageMessageId.Error;
             return RedirectToAction("Manage", new { Message = message });
         }
 
@@ -356,14 +346,14 @@ namespace ContestMeter.Web.Site.Controllers
         [ValidateAntiForgeryToken]
         public async System.Threading.Tasks.Task<ActionResult> Manage(ManageUserViewModel model)
         {
-            bool hasPassword = HasPassword();
+            var hasPassword = HasPassword();
             ViewBag.HasLocalPassword = hasPassword;
             ViewBag.ReturnUrl = Url.Action("Manage");
             if (hasPassword)
             {
                 if (ModelState.IsValid)
                 {
-                    IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword, model.NewPassword);
+                    var result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword, model.NewPassword);
                     if (result.Succeeded)
                     {
                         return RedirectToAction("Manage", new { Message = ManageMessageId.ChangePasswordSuccess });
@@ -377,7 +367,7 @@ namespace ContestMeter.Web.Site.Controllers
             else
             {
                 // User does not have a password so remove any validation errors caused by a missing OldPassword field
-                ModelState state = ModelState["OldPassword"];
+                var state = ModelState["OldPassword"];
                 if (state != null)
                 {
                     state.Errors.Clear();
@@ -385,7 +375,7 @@ namespace ContestMeter.Web.Site.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    IdentityResult result = await UserManager.AddPasswordAsync(User.Identity.GetUserId(), model.NewPassword);
+                    var result = await UserManager.AddPasswordAsync(User.Identity.GetUserId(), model.NewPassword);
                     if (result.Succeeded)
                     {
                         return RedirectToAction("Manage", new { Message = ManageMessageId.SetPasswordSuccess });
@@ -527,7 +517,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             var linkedAccounts = UserManager.GetLogins(User.Identity.GetUserId());
             ViewBag.ShowRemoveButton = HasPassword() || linkedAccounts.Count > 1;
-            return (ActionResult)PartialView("_RemoveAccountPartial", linkedAccounts);
+            return PartialView("_RemoveAccountPartial", linkedAccounts);
         }
 
         public async System.Threading.Tasks.Task<ActionResult> RemoveAccount()
@@ -572,13 +562,7 @@ namespace ContestMeter.Web.Site.Controllers
         // Used for XSRF protection when adding external logins
         private const string XsrfKey = "XsrfId";
 
-        private IAuthenticationManager AuthenticationManager
-        {
-            get
-            {
-                return HttpContext.GetOwinContext().Authentication;
-            }
-        }
+        private IAuthenticationManager AuthenticationManager => HttpContext.GetOwinContext().Authentication;
 
         private async System.Threading.Tasks.Task SignInAsync(ApplicationUser user, bool isPersistent)
         {
@@ -657,10 +641,10 @@ namespace ContestMeter.Web.Site.Controllers
         // ToDo: подключить ContestMeter и взять этот метод оттуда (удалить этот)
         public static IPAddress GetLocalIP4()
         {
-            var host = Dns.GetHostEntry(String.Empty);
-            var ipAddr = host.AddressList.Where(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
-                && x != IPAddress.Any && x != IPAddress.Broadcast && x != IPAddress.Loopback && !IPAddress.IsLoopback(x)).FirstOrDefault();
-            return ipAddr;
+            var host = Dns.GetHostEntry(string.Empty);
+            return host.AddressList.Where(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+                                               && x != IPAddress.Any && x != IPAddress.Broadcast &&
+                                               x != IPAddress.Loopback && !IPAddress.IsLoopback(x)).FirstOrDefault();
         }
         #endregion
     }

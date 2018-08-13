@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Data;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
@@ -9,8 +8,6 @@ using System.Net;
 using System.Web;
 using System.Web.Hosting;
 using System.Web.Mvc;
-using System.Web.Routing;
-using System.Web.Security;
 using ContestMeter.Web.Site.Database.Entities;
 using ContestMeter.Web.Site.Database;
 using ContestMeter.Web.Site.Models;
@@ -22,21 +19,21 @@ namespace ContestMeter.Web.Site.Controllers
     [Authorize(Roles = "administrator, teacher")]
     public class ContestsController : Controller
     {
-        private ContestMeterDbContext db = new ContestMeterDbContext();
+        private ContestMeterDbContext _db = new ContestMeterDbContext();
 
         public async System.Threading.Tasks.Task<ActionResult> Index()
         {
             ContestsIndexViewModel model;
             if (!User.IsInRole("administrator"))
             {
-                string currentUserId = User.Identity.GetUserId();
-                string currentUserName = User.Identity.GetUserName();
-                var contestTeachers = db.ContestTeachers.Where(ct => ct.TeacherId == currentUserId);
+                var currentUserId = User.Identity.GetUserId();
+                var currentUserName = User.Identity.GetUserName();
+                var contestTeachers = _db.ContestTeachers.Where(ct => ct.TeacherId == currentUserId);
 
                 model = new ContestsIndexViewModel
                 {
                     Contests =
-                        db.Contests.Include(c => c.ContestsType)
+                        _db.Contests.Include(c => c.ContestsType)
                             .Where(c => contestTeachers.Any(ct => ct.ContestId == c.Id))
                             .Include(c => c.Teacher)
                 };
@@ -45,7 +42,7 @@ namespace ContestMeter.Web.Site.Controllers
 
             model = new ContestsIndexViewModel
             {
-                Contests = await db.Contests.Include(c => c.ContestsType).Include(c => c.Teacher).ToListAsync()
+                Contests = await _db.Contests.Include(c => c.ContestsType).Include(c => c.Teacher).ToListAsync()
             };
 
             return View(model);
@@ -73,7 +70,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             var model = new ContestsCreateViewModel
             {
-                ContestsTypes = new SelectList(db.ContestsTypes, "Id", "Name")
+                ContestsTypes = new SelectList(_db.ContestsTypes, "Id", "Name")
             };
             return View(model);
         }
@@ -84,7 +81,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await db.Contests.AnyAsync(c => c.ContestsTypeId == model.ContestsTypeId && c.Name == model.Name))
+                if (await _db.Contests.AnyAsync(c => c.ContestsTypeId == model.ContestsTypeId && c.Name == model.Name))
                 {
                     ModelState.AddModelError("", "Контест с таким именем и типом уже существует");
                 }
@@ -106,13 +103,13 @@ namespace ContestMeter.Web.Site.Controllers
                         TeacherId = contest.TeacherId
                     };
 
-                    db.Contests.Add(contest);
-                    db.ContestTeachers.Add(contestTeacher);
-                    await db.SaveChangesAsync();
+                    _db.Contests.Add(contest);
+                    _db.ContestTeachers.Add(contestTeacher);
+                    await _db.SaveChangesAsync();
                     return RedirectToAction("Index");
                 }
             }
-            model.ContestsTypes = new SelectList(db.ContestsTypes, "Id", "Name");
+            model.ContestsTypes = new SelectList(_db.ContestsTypes, "Id", "Name");
             return View(model);
         }
 
@@ -122,12 +119,12 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = await db.Contests.FindAsync(id);
+            var contest = await _db.Contests.FindAsync(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 ViewBag.ErrorMessage = "Вы не имеете право редактировать этот контест";
                 return View("Error");
@@ -139,7 +136,7 @@ namespace ContestMeter.Web.Site.Controllers
                 TeacherId = contest.TeacherId,
                 Name = contest.Name,
                 IsActive = contest.IsActive,
-                ContestsTypes = new SelectList(db.ContestsTypes, "Id", "Name")
+                ContestsTypes = new SelectList(_db.ContestsTypes, "Id", "Name")
             };
             return View(model);
         }
@@ -150,13 +147,13 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await db.Contests.AnyAsync(c => c.ContestsTypeId == model.ContestsTypeId && c.Name == model.Name && c.Id != model.ContestId))
+                if (await _db.Contests.AnyAsync(c => c.ContestsTypeId == model.ContestsTypeId && c.Name == model.Name && c.Id != model.ContestId))
                 {
                     ModelState.AddModelError("", "Контест с таким именем и типом уже существует");
                 }
                 else
                 {
-                    string teacherId = User.IsInRole("administrator") ? model.TeacherId : User.Identity.GetUserId();
+                    var teacherId = User.IsInRole("administrator") ? model.TeacherId : User.Identity.GetUserId();
                     var contest = new Contest
                     {
                         Id = model.ContestId,
@@ -166,12 +163,12 @@ namespace ContestMeter.Web.Site.Controllers
                         IsActive = model.IsActive
                     };
 
-                    db.Entry(contest).State = EntityState.Modified;
-                    await db.SaveChangesAsync();
+                    _db.Entry(contest).State = EntityState.Modified;
+                    await _db.SaveChangesAsync();
                     return RedirectToAction("Index");
                 }
             }
-            model.ContestsTypes = new SelectList(db.ContestsTypes, "Id", "Name");
+            model.ContestsTypes = new SelectList(_db.ContestsTypes, "Id", "Name");
             return View(model);
         }
 
@@ -181,19 +178,19 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = await db.Contests.FindAsync(id);
+            var contest = await _db.Contests.FindAsync(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 ViewBag.ErrorMessage = "Вы не имеете право смотреть логи исключений для данного контеста";
                 return View("Error");
             }
             var model = new ContestsExceptionsLogsViewModel
             {
-                ExceptionsLogs = db.ExceptionsLogs.Include(x => x.User).Where(el => el.ContestId == contest.Id).OrderByDescending(el => el.CreatedDate),
+                ExceptionsLogs = _db.ExceptionsLogs.Include(x => x.User).Where(el => el.ContestId == contest.Id).OrderByDescending(el => el.CreatedDate),
                 ContestName = contest.Name
             };
             return View(model);
@@ -205,7 +202,7 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var contest = await db.Contests.FindAsync(contestId);
+            var contest = await _db.Contests.FindAsync(contestId);
             if (contest == null)
             {
                 return HttpNotFound();
@@ -214,13 +211,13 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var exceptionsLog = await db.ExceptionsLogs.FindAsync(id);
+            var exceptionsLog = await _db.ExceptionsLogs.FindAsync(id);
             if (exceptionsLog == null)
             {
                 return HttpNotFound();
             }
-            db.Entry(exceptionsLog).State = EntityState.Deleted;
-            await db.SaveChangesAsync();
+            _db.Entry(exceptionsLog).State = EntityState.Deleted;
+            await _db.SaveChangesAsync();
 
             return RedirectToAction("ExceptionsLogs", new {id = contestId});
         }
@@ -232,12 +229,12 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = await db.Contests.FindAsync(id);
+            var contest = await _db.Contests.FindAsync(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 ViewBag.ErrorMessage = "Вы не имеете право удалять этот контест";
                 return View("Error");
@@ -249,29 +246,29 @@ namespace ContestMeter.Web.Site.Controllers
         [ValidateAntiForgeryToken]
         public async System.Threading.Tasks.Task<ActionResult> DeleteConfirmed(Guid id)
         {
-            Contest contest = await db.Contests.FindAsync(id);
+            var contest = await _db.Contests.FindAsync(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            List<Task> tasks = await db.Tasks.Where(t => t.ContestId == id).ToListAsync();
+            var tasks = await _db.Tasks.Where(t => t.ContestId == id).ToListAsync();
             foreach (var task in tasks)
             {
-                db.Tasks.Remove(task);
+                _db.Tasks.Remove(task);
                 DeleteTaskDescriptionFiles(task.Id);
             }
-            List<DevelopmentTool> devTools = await db.DevelopmentTools.Where(t => t.ContestId == id).ToListAsync();
+            var devTools = await _db.DevelopmentTools.Where(t => t.ContestId == id).ToListAsync();
             foreach (var devTool in devTools)
-                db.DevelopmentTools.Remove(devTool);
-            List<UserAttempt> userAttempts = await db.UserAttempts.Where(t => t.ContestId == id).ToListAsync();
+                _db.DevelopmentTools.Remove(devTool);
+            var userAttempts = await _db.UserAttempts.Where(t => t.ContestId == id).ToListAsync();
             foreach (var userAttempt in userAttempts)
                 userAttempt.ContestId = null;
-            List<ExceptionsLog> exceptionLogs = await db.ExceptionsLogs.Where(t => t.ContestId == id).ToListAsync();
+            var exceptionLogs = await _db.ExceptionsLogs.Where(t => t.ContestId == id).ToListAsync();
             foreach (var exceptionLog in exceptionLogs)
                 exceptionLog.ContestId = null;
 
-            db.Contests.Remove(contest);
-            await db.SaveChangesAsync();
+            _db.Contests.Remove(contest);
+            await _db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
@@ -282,25 +279,25 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = db.Contests.Find(id);
+            var contest = _db.Contests.Find(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 ViewBag.ErrorMessage = "Вы не имеете право просматривать список преподавателей для этого контеста";
                 return View("Error");
             }
 
             var currentUserId = User.Identity.GetUserId();
-            var roleStore = new RoleStore<IdentityRole>(db);
+            var roleStore = new RoleStore<IdentityRole>(_db);
             var roleManager = new RoleManager<IdentityRole>(roleStore);
             var teacherRoleUsers = roleManager.Roles.First(r => r.Name == "teacher").Users;
 
-            var contestTeachers = db.ContestTeachers.Where(ct => ct.ContestId == contest.Id).ToList();
-            List<string> teacherIds = new List<string>();
-            List<string> contestTeacherIds = new List<string>();
+            var contestTeachers = _db.ContestTeachers.Where(ct => ct.ContestId == contest.Id).ToList();
+            var teacherIds = new List<string>();
+            var contestTeacherIds = new List<string>();
             foreach (var teacherRoleUser in teacherRoleUsers)
             {
                 if (!contestTeachers.Any(ct => ct.ContestId == contest.Id && ct.TeacherId == teacherRoleUser.UserId))
@@ -313,8 +310,8 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 ContestId = id,
                 TeacherId = contest.TeacherId,
-                Teachers = db.Users.Where(t => teacherIds.Contains(t.Id) && !t.IsDeleted && t.Id != currentUserId),
-                ContestTeachers = db.Users.Where(t => contestTeacherIds.Contains(t.Id) && !t.IsDeleted && t.Id != currentUserId)
+                Teachers = _db.Users.Where(t => teacherIds.Contains(t.Id) && !t.IsDeleted && t.Id != currentUserId),
+                ContestTeachers = _db.Users.Where(t => contestTeacherIds.Contains(t.Id) && !t.IsDeleted && t.Id != currentUserId)
             };
             return PartialView(model);
         }
@@ -325,12 +322,12 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var contest = await db.Contests.FindAsync(contestId);
+            var contest = await _db.Contests.FindAsync(contestId);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contestId))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contestId))
             {
                 ViewBag.ErrorMessage = "Вы не имеете право добавлять преподавателей для данного контеста";
                 return View("Error");
@@ -353,8 +350,8 @@ namespace ContestMeter.Web.Site.Controllers
                 TeacherId = id
             };
 
-            db.Entry(contestTeacher).State = EntityState.Added;
-            await db.SaveChangesAsync();
+            _db.Entry(contestTeacher).State = EntityState.Added;
+            await _db.SaveChangesAsync();
 
             return RedirectToAction("Edit", new { id = contestId });
         }
@@ -365,12 +362,12 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var contest = await db.Contests.FindAsync(contestId);
+            var contest = await _db.Contests.FindAsync(contestId);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contestId))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contestId))
             {
                 TempData["Message"] = "Вы не имеете право удалять преподавателей для данного контеста";
                 return RedirectToAction("Edit", new { id = contestId });
@@ -388,13 +385,13 @@ namespace ContestMeter.Web.Site.Controllers
                 //ViewBag.ErrorMessage = "Вы не можете удалить создателя контеста из списка его преподавателей";
                 //return View("Error");
             }
-            var contestTeacher = db.ContestTeachers.FirstOrDefault(ct => ct.TeacherId == id);
+            var contestTeacher = _db.ContestTeachers.FirstOrDefault(ct => ct.TeacherId == id);
             if (contestTeacher == null)
             {
                 return HttpNotFound();
             }
-            db.Entry(contestTeacher).State = EntityState.Deleted;
-            await db.SaveChangesAsync();
+            _db.Entry(contestTeacher).State = EntityState.Deleted;
+            await _db.SaveChangesAsync();
 
             return RedirectToAction("Edit", new { id = contestId });
         }
@@ -407,12 +404,12 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = db.Contests.Find(id);
+            var contest = _db.Contests.Find(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 TempData["Message"] = "Вы не имеете право просматривать список задач для этого контеста";
                 return RedirectToAction("Edit", new {id });
@@ -422,7 +419,7 @@ namespace ContestMeter.Web.Site.Controllers
             var model = new ContestsTasksListViewModel
             {
                 ContestId = id,
-                Tasks = db.Tasks.Where(t => t.ContestId == id).Include(t => t.Contest)
+                Tasks = _db.Tasks.Where(t => t.ContestId == id).Include(t => t.Contest)
             };
             return PartialView(model);
         }
@@ -433,12 +430,12 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = db.Contests.Find(id);
+            var contest = _db.Contests.Find(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 TempData["Message"] = "Вы не имеете право создавать задачи для этого контеста";
                 return RedirectToAction("Edit", new { id });
@@ -460,7 +457,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await db.Tasks.AnyAsync(t => t.ContestId == model.ContestId && (t.ExecutableName == model.ExecutableName || t.Name == model.Name)))
+                if (await _db.Tasks.AnyAsync(t => t.ContestId == model.ContestId && (t.ExecutableName == model.ExecutableName || t.Name == model.Name)))
                 {
                     ModelState.AddModelError("", "Задача в данном контесте с таким именем уже существует");
                 }
@@ -481,17 +478,17 @@ namespace ContestMeter.Web.Site.Controllers
                         Rating = 0
                     };
 
-                    if (fileUpload == null || String.IsNullOrEmpty(fileUpload.FileName))
+                    if (string.IsNullOrEmpty(fileUpload?.FileName))
                     {
                         ModelState.AddModelError("", "Не выбран загружаемый файл с описанием задачи");
                         return View(model);
                     }
-                    if (checkerFile == null || String.IsNullOrEmpty(checkerFile.FileName))
+                    if (string.IsNullOrEmpty(checkerFile?.FileName))
                     {
                         ModelState.AddModelError("", "Не выбран загружаемый файл с чекером задачи");
                         return View(model);
                     }
-                    if (testsFiles == null || testsFiles.Any(tf => tf == null || String.IsNullOrEmpty(tf.FileName)))
+                    if (testsFiles == null || testsFiles.Any(tf => string.IsNullOrEmpty(tf?.FileName)))
                     {
                         ModelState.AddModelError("", "Не выбраны файлы тестов для задачи");
                         return View(model);
@@ -502,7 +499,7 @@ namespace ContestMeter.Web.Site.Controllers
                     {
                         fileUpload.SaveAs(HostingEnvironment.ApplicationPhysicalPath +
                                             "Documents/TasksDescriptions/" +
-                                            task.Id.ToString() + ext);
+                                            task.Id + ext);
                     }
                     else
                     {
@@ -522,8 +519,8 @@ namespace ContestMeter.Web.Site.Controllers
                         testFile.SaveAs(checkerFolder + "\\Tests\\" + task.ExecutableName + "\\" + testFile.FileName);
                     }
 
-                    db.Tasks.Add(task);
-                    await db.SaveChangesAsync();
+                    _db.Tasks.Add(task);
+                    await _db.SaveChangesAsync();
                     return RedirectToAction("Edit", new {id = model.ContestId});
                 }
             }
@@ -536,17 +533,17 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Task task = await db.Tasks.FindAsync(id);
+            var task = await _db.Tasks.FindAsync(id);
             if (task == null)
             {
                 return HttpNotFound();
             }
-            Contest contest = db.Contests.Find(task.ContestId);
+            var contest = _db.Contests.Find(task.ContestId);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 TempData["Message"] = "Вы не имеете право редактировать задачи для этого контеста";
                 return RedirectToAction("Edit", new { id = task.ContestId});
@@ -591,17 +588,17 @@ namespace ContestMeter.Web.Site.Controllers
                     Rating = model.Rating
                 };
 
-                if (fileUpload == null || String.IsNullOrEmpty(fileUpload.FileName))
+                if (string.IsNullOrEmpty(fileUpload?.FileName))
                 {
                     ModelState.AddModelError("", "Не выбран загружаемый файл с описанием задачи");
                     return View(model);
                 }
-                if (checkerFile == null || String.IsNullOrEmpty(checkerFile.FileName))
+                if (string.IsNullOrEmpty(checkerFile?.FileName))
                 {
                     ModelState.AddModelError("", "Не выбран загружаемый файл с чекером задачи");
                     return View(model);
                 }
-                if (testsFiles == null || testsFiles.Any(tf => tf == null || String.IsNullOrEmpty(tf.FileName)))
+                if (testsFiles == null || testsFiles.Any(tf => string.IsNullOrEmpty(tf?.FileName)))
                 {
                     ModelState.AddModelError("", "Не выбраны файлы тестов для задачи");
                     return View(model);
@@ -612,7 +609,7 @@ namespace ContestMeter.Web.Site.Controllers
                 {
                     fileUpload.SaveAs(HostingEnvironment.ApplicationPhysicalPath +
                                         "Documents/TasksDescriptions/" +
-                                        task.Id.ToString() + ext);
+                                        task.Id + ext);
                 }
                 else
                 {
@@ -632,8 +629,8 @@ namespace ContestMeter.Web.Site.Controllers
                     testFile.SaveAs(checkerFolder + "\\Tests\\" + task.ExecutableName + "\\" + testFile.FileName);
                 }
 
-                db.Entry(task).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+                _db.Entry(task).State = EntityState.Modified;
+                await _db.SaveChangesAsync();
                 return RedirectToAction("Edit", new { id = model.ContestId });
             }
             return View(model);
@@ -645,17 +642,17 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Task task = await db.Tasks.FindAsync(id);
+            var task = await _db.Tasks.FindAsync(id);
             if (task == null)
             {
                 return HttpNotFound();
             }
-            Contest contest = db.Contests.Find(task.ContestId);
+            var contest = _db.Contests.Find(task.ContestId);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 TempData["Message"] = "Вы не имеете право удалять задачи этого контеста";
                 return RedirectToAction("Edit", new { id = task.ContestId });
@@ -684,12 +681,12 @@ namespace ContestMeter.Web.Site.Controllers
         [ValidateAntiForgeryToken]
         public async System.Threading.Tasks.Task<ActionResult> TasksDeleteConfirmed(Guid? id)
         {
-            Task task = await db.Tasks.FindAsync(id);
+            var task = await _db.Tasks.FindAsync(id);
             if (task == null)
             {
                 return HttpNotFound();
             }
-            List<UserAttempt> userAttempts = await db.UserAttempts.Where(t => t.TaskId == id).ToListAsync();
+            var userAttempts = await _db.UserAttempts.Where(t => t.TaskId == id).ToListAsync();
             foreach (var userAttempt in userAttempts)
                 userAttempt.TaskId = null;
 
@@ -700,16 +697,15 @@ namespace ContestMeter.Web.Site.Controllers
                 System.IO.File.Delete(checkerFolder + "\\Checkers\\" + task.CheckerName);
 
             var di = new DirectoryInfo(checkerFolder + "\\Tests\\" + task.ExecutableName + "\\");
-            var testsFiles = di.GetFiles();
-            foreach (var testFile in testsFiles)
+            foreach (var testFile in di.GetFiles())
             {
                 testFile.Delete();
             }
             if (Directory.Exists(checkerFolder + "\\Tests\\" + task.ExecutableName + "\\"))
                 Directory.Delete(checkerFolder + "\\Tests\\" + task.ExecutableName + "\\");
 
-            db.Tasks.Remove(task);
-            await db.SaveChangesAsync();
+            _db.Tasks.Remove(task);
+            await _db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
         #endregion
@@ -721,12 +717,12 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = db.Contests.Find(id);
+            var contest = _db.Contests.Find(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 TempData["Message"] = "Вы не имеете право просматривать список компиляторов для этого контеста";
                 return RedirectToAction("Edit", new { id });
@@ -736,7 +732,7 @@ namespace ContestMeter.Web.Site.Controllers
             var model = new ContestsDevelopmentToolsListViewModel
             {
                 ContestId = id,
-                DevelopmentTools = db.DevelopmentTools.Where(t => t.ContestId == id).Include(t => t.Contest)
+                DevelopmentTools = _db.DevelopmentTools.Where(t => t.ContestId == id).Include(t => t.Contest)
             };
             return PartialView(model);
         }
@@ -747,12 +743,12 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = db.Contests.Find(id);
+            var contest = _db.Contests.Find(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 TempData["Message"] = "Вы не имеете право создавать компиляторы для этого контеста";
                 return RedirectToAction("Edit", new { id });
@@ -772,7 +768,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await db.DevelopmentTools.AnyAsync(d => d.ContestId == model.ContestId && d.Name == model.Name))
+                if (await _db.DevelopmentTools.AnyAsync(d => d.ContestId == model.ContestId && d.Name == model.Name))
                 {
                     ModelState.AddModelError("", "Компилятор в данном контесте с таким именем уже существует");
                 }
@@ -786,8 +782,8 @@ namespace ContestMeter.Web.Site.Controllers
                         CompileCommand = model.CompileCommand,
                         CommandArgs = model.CommandArgs
                     };
-                    db.DevelopmentTools.Add(developmentTool);
-                    await db.SaveChangesAsync();
+                    _db.DevelopmentTools.Add(developmentTool);
+                    await _db.SaveChangesAsync();
                     return RedirectToAction("Edit", new { id = model.ContestId });
                 }
             }
@@ -800,17 +796,17 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            DevelopmentTool developmentTool = await db.DevelopmentTools.FindAsync(id);
+            var developmentTool = await _db.DevelopmentTools.FindAsync(id);
             if (developmentTool == null)
             {
                 return HttpNotFound();
             }
-            Contest contest = db.Contests.Find(developmentTool.ContestId);
+            var contest = _db.Contests.Find(developmentTool.ContestId);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 TempData["Message"] = "Вы не имеете право редактировать компиляторы для этого контеста";
                 return RedirectToAction("Edit", new { id = developmentTool.ContestId});
@@ -834,7 +830,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await db.DevelopmentTools.AnyAsync(d => d.ContestId == model.ContestId && d.Name == model.Name))
+                if (await _db.DevelopmentTools.AnyAsync(d => d.ContestId == model.ContestId && d.Name == model.Name))
                 {
                     ModelState.AddModelError("", "Компилятор в данном контесте с таким именем уже существует");
                 }
@@ -849,8 +845,8 @@ namespace ContestMeter.Web.Site.Controllers
                         CommandArgs = model.CommandArgs
                     };
 
-                    db.Entry(developmentTool).State = EntityState.Modified;
-                    await db.SaveChangesAsync();
+                    _db.Entry(developmentTool).State = EntityState.Modified;
+                    await _db.SaveChangesAsync();
                     return RedirectToAction("Edit", new { id = model.ContestId });
                 }
             }
@@ -863,17 +859,17 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            DevelopmentTool developmentTool = await db.DevelopmentTools.FindAsync(id);
+            var developmentTool = await _db.DevelopmentTools.FindAsync(id);
             if (developmentTool == null)
             {
                 return HttpNotFound();
             }
-            Contest contest = db.Contests.Find(developmentTool.ContestId);
+            var contest = _db.Contests.Find(developmentTool.ContestId);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contest.Id))
             {
                 TempData["Message"] = "Вы не имеете право удалять компиляторы этого контеста";
                 return RedirectToAction("Edit", new { id = developmentTool.ContestId });
@@ -895,23 +891,23 @@ namespace ContestMeter.Web.Site.Controllers
         [ValidateAntiForgeryToken]
         public async System.Threading.Tasks.Task<ActionResult> DevelopmentToolsDeleteConfirmed(Guid? id)
         {
-            DevelopmentTool developmentTool = await db.DevelopmentTools.FindAsync(id);
+            var developmentTool = await _db.DevelopmentTools.FindAsync(id);
             if (developmentTool == null)
             {
                 return HttpNotFound();
             }
-            List<UserAttempt> userAttempts = await db.UserAttempts.Where(d => d.DevelopmentToolId == id).ToListAsync();
+            var userAttempts = await _db.UserAttempts.Where(d => d.DevelopmentToolId == id).ToListAsync();
             foreach (var userAttempt in userAttempts)
                 userAttempt.DevelopmentToolId = null;
 
-            db.DevelopmentTools.Remove(developmentTool);
-            await db.SaveChangesAsync();
+            _db.DevelopmentTools.Remove(developmentTool);
+            await _db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
         #endregion
 
         #region Additional Methods And Properties
-        private string[] _allowedExtForTasksDescriptionFiles =
+        private readonly string[] _allowedExtForTasksDescriptionFiles =
         {
             ".pdf"
         };
@@ -923,22 +919,20 @@ namespace ContestMeter.Web.Site.Controllers
 
             if (!string.IsNullOrWhiteSpace(appUrl)) appUrl += "/";
 
-            var baseUrl = string.Format("{0}://{1}{2}", request.Url.Scheme, request.Url.Authority, appUrl);
-
-            return baseUrl;
+            return string.Format("{0}://{1}{2}", request.Url.Scheme, request.Url.Authority, appUrl);
         }
 
         private string GetFirstTaskDescriptionFile(Guid taskId)
         {
             var taskFiles = Directory.GetFiles(HostingEnvironment.ApplicationPhysicalPath + "Documents/TasksDescriptions/",
-                taskId.ToString() + ".*");
+                taskId + ".*");
             return GetBaseUrl() + "Documents/TasksDescriptions/" + Path.GetFileName(taskFiles.FirstOrDefault());
         }
 
         private void DeleteTaskDescriptionFiles(Guid taskId)
         {
             var taskFiles = Directory.GetFiles(HostingEnvironment.ApplicationPhysicalPath + "Documents/TasksDescriptions/",
-                taskId.ToString() + ".*");
+                taskId + ".*");
             if (taskFiles.Any())
             {
                 foreach (var file in taskFiles)
@@ -954,7 +948,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
         }

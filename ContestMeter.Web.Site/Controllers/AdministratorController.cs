@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using ContestMeter.Web.Site.Database;
 using ContestMeter.Web.Site.Database.Entities;
-using ContestMeter.Web.Site.Database.Migrations;
 using ContestMeter.Web.Site.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -22,21 +19,20 @@ namespace ContestMeter.Web.Site.Controllers
 
         public ActionResult Main()
         {
-            var model = new AdministratorMainViewModel();
-            model.PostedSolutionsRootFolder = ConfigurationManager.AppSettings["PostedSolutionsRootFolder"];
-            model.SiteConfigFolder = ConfigurationManager.AppSettings["SiteConfigFolder"];
-            model.RecaptchaPrivateKey = ConfigurationManager.AppSettings["recaptchaPrivateKey"];
-            model.RecaptchaPublicKey = ConfigurationManager.AppSettings["recaptchaPublicKey"];
-            bool allowRegister;
-            if (bool.TryParse(ConfigurationManager.AppSettings["AllowRegister"], out allowRegister))
+            var model = new AdministratorMainViewModel
+            {
+                PostedSolutionsRootFolder = ConfigurationManager.AppSettings["PostedSolutionsRootFolder"],
+                SiteConfigFolder = ConfigurationManager.AppSettings["SiteConfigFolder"],
+                RecaptchaPrivateKey = ConfigurationManager.AppSettings["recaptchaPrivateKey"],
+                RecaptchaPublicKey = ConfigurationManager.AppSettings["recaptchaPublicKey"]
+            };
+            if (bool.TryParse(ConfigurationManager.AppSettings["AllowRegister"], out var allowRegister))
             {
                 model.AllowRegister = allowRegister;
-                bool allowRegisterTeacher;
-                if (bool.TryParse(ConfigurationManager.AppSettings["AllowRegisterTeacher"], out allowRegisterTeacher))
+                if (bool.TryParse(ConfigurationManager.AppSettings["AllowRegisterTeacher"], out var allowRegisterTeacher))
                 {
                     model.AllowRegisterTeacher = allowRegisterTeacher;
-                    bool useRecaptcha;
-                    if (bool.TryParse(ConfigurationManager.AppSettings["UseRecaptcha"], out useRecaptcha))
+                    if (bool.TryParse(ConfigurationManager.AppSettings["UseRecaptcha"], out var useRecaptcha))
                     {
                         model.UseRecaptcha = useRecaptcha;
                         return View(model);
@@ -103,7 +99,7 @@ namespace ContestMeter.Web.Site.Controllers
             }
             var administratorsRoleId = db.Roles.First(r => r.Name == "administrator").Id;
             var participantsRoleId = db.Roles.First(r => r.Name == "participant").Id;
-            var TeachersRoleId = db.Roles.First(r => r.Name == "teacher").Id;
+            var teachersRoleId = db.Roles.First(r => r.Name == "teacher").Id;
             var userRoleId = user.Roles.First().RoleId;
             if (administratorsRoleId == userRoleId)
             {
@@ -128,7 +124,7 @@ namespace ContestMeter.Web.Site.Controllers
                     db.Entry(teamParticipants).State = EntityState.Deleted;
                 }
             }
-            else if (TeachersRoleId == userRoleId)
+            else if (teachersRoleId == userRoleId)
             {
                 var teacherContests = db.Contests.Where(c => c.TeacherId == user.Id);
                 foreach (var teacherContest in teacherContests)

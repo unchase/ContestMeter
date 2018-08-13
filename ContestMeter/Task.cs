@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Runtime.Serialization;
-using System.ComponentModel;
-using System.Windows.Threading;
-using System.Windows;
+﻿using System.Runtime.Serialization;
 
 namespace ContestMeter.Common
 {

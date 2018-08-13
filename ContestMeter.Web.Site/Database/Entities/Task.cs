@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ContestMeter.Web.Site.Database.Entities
 {
@@ -11,8 +8,8 @@ namespace ContestMeter.Web.Site.Database.Entities
     {
         public Task()
         {
-            this.PostedSolutions = new HashSet<PostedSolution>();
-            this.UserAttempts = new HashSet<UserAttempt>();
+            PostedSolutions = new HashSet<PostedSolution>();
+            UserAttempts = new HashSet<UserAttempt>();
         }
 
         [Key]

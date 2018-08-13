@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ComponentModel;
 using System.Runtime.Serialization;
-using System.IO;
 using System.Collections.ObjectModel;
 
 namespace ContestMeter.Common
@@ -205,9 +200,9 @@ namespace ContestMeter.Common
         {
             get
             {
-                if (String.IsNullOrEmpty(LastName)
-                    || String.IsNullOrEmpty(FirstName)
-                    || String.IsNullOrEmpty(School)
+                if (string.IsNullOrEmpty(LastName)
+                    || string.IsNullOrEmpty(FirstName)
+                    || string.IsNullOrEmpty(School)
                     || Grade < 8 || Grade > 11)
                 {
                     Error = "Данные не действительны";

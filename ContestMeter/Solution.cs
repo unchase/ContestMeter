@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.IO;
 using System.Diagnostics;
 using System.Xml.Serialization;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Security.Principal;
-using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Runtime.Serialization;
-using System.Windows;
 using System.Security;
 using ThreadState = System.Threading.ThreadState;
 
@@ -223,7 +217,7 @@ namespace ContestMeter.Common
         [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
         public void Check(string workingDirectory, string solutionsFolder)
         {
-            FileInfo fi = new FileInfo(LocalSourcePath);
+            var fi = new FileInfo(LocalSourcePath);
             if (fi.Length <= MaxSourceSize || MaxSourceSize == 0)
             {
                 Score = 0;
@@ -242,7 +236,7 @@ namespace ContestMeter.Common
 
         private void DoCheck(string workingDirectory, string solutionsFolder)
         {
-            string testsFolder = FileSystem.Combine(Configuration.TestsFolder, ExecutableName);
+            var testsFolder = FileSystem.Combine(Configuration.TestsFolder, ExecutableName);
             Compile(workingDirectory, solutionsFolder);
             var tests = FileSystem.List(testsFolder); 
             if (tests != null)
@@ -251,7 +245,7 @@ namespace ContestMeter.Common
                 TestsCount = tests.Count();
                 foreach (var infile in tests)
                 {
-                    string infileUrl = FileSystem.Combine(testsFolder, infile);
+                    var infileUrl = FileSystem.Combine(testsFolder, infile);
 
                     if (!Run(infileUrl, infileUrl + ".a", GetCheckerUrl()))
                     {
@@ -357,7 +351,7 @@ namespace ContestMeter.Common
 
         private bool CheckOutputFile(string workingDirectory, string tempInput, string tempOutput, string tempAnswer, string tempChecker)
         {
-            string result = System.IO.Path.Combine(workingDirectory, "result.xml");
+            var result = System.IO.Path.Combine(workingDirectory, "result.xml");
             var procInfo = new ProcessStartInfo
             {
                 FileName = tempChecker,
@@ -368,14 +362,14 @@ namespace ContestMeter.Common
                 WorkingDirectory = workingDirectory,
                 RedirectStandardOutput = true,
             };
-            Process process = new Process();
+            var process = new Process();
             try
             {
                 process.StartInfo = procInfo;
                 process.Start();
                 process.WaitForExit();
 
-                XmlSerializer serializer = new XmlSerializer(typeof(CheckerResult));
+                var serializer = new XmlSerializer(typeof(CheckerResult));
                 using (var stream = File.OpenRead(result))
                 {
                     var checkResult = (CheckerResult)serializer.Deserialize(stream);
@@ -394,19 +388,19 @@ namespace ContestMeter.Common
 
         private bool RunInSandbox(string workingDirectory, int timeLimit)
         {
-            string fileNameArg = System.IO.Path.Combine(workingDirectory, ExecutableName + ".exe");
+            var fileNameArg = System.IO.Path.Combine(workingDirectory, ExecutableName + ".exe");
 
             var tempInput = System.IO.Path.Combine(workingDirectory, InputFileName);
             var tempOutput = System.IO.Path.Combine(workingDirectory, OutputFileName);
 
             try
             {
-                System.Reflection.AssemblyName testAssembly =
+                var testAssembly =
                     System.Reflection.AssemblyName.GetAssemblyName(fileNameArg);
                 // если после этой строки не возникло исключение BadImageFormatException, то проверяется .net сборка
 
                 // запрещаем все AppDomain'у
-                PermissionSet permissionSet = new PermissionSet(PermissionState.None);
+                var permissionSet = new PermissionSet(PermissionState.None);
 
                 // добавляем необходимые разрешения
                 permissionSet.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution));
@@ -420,7 +414,7 @@ namespace ContestMeter.Common
                 // включаем мониторинг ЦП и памяти доменов приложений для данного процесса
                 AppDomain.MonitoringIsEnabled = true;
 
-                Sandbox sandbox = new Sandbox(workingDirectory, permissionSet);
+                var sandbox = new Sandbox(workingDirectory, permissionSet);
 
                 // заводим переменную Exception для хранения в основном потоке тех исключений, которые возникают во вторичном потоке
                 Exception threadException = null;
@@ -500,8 +494,7 @@ namespace ContestMeter.Common
                     LoadUserProfile = false,
                 };
 
-                var process = new Process();
-                process.StartInfo = startInfo;
+                var process = new Process {StartInfo = startInfo};
 
 
                 if (process.Start())
@@ -592,14 +585,14 @@ namespace ContestMeter.Common
         {
             if (!DevTool.IsExeFile)
             {
-                string exeFile = System.IO.Path.Combine(workingDirectory, ExecutableName + ".exe");
+                var exeFile = System.IO.Path.Combine(workingDirectory, ExecutableName + ".exe");
                 SafeDelete(exeFile);
-                string sourcePath = System.IO.Path.Combine(workingDirectory, SourceFileName);
-                string taskUrl = solutionsFolder;
-                string sourceFile = FileSystem.Combine(taskUrl, SourceFileName);
+                var sourcePath = System.IO.Path.Combine(workingDirectory, SourceFileName);
+                var taskUrl = solutionsFolder;
+                var sourceFile = FileSystem.Combine(taskUrl, SourceFileName);
                 if (FileSystem.Exists(sourceFile))
                 {
-                    string url = string.Format("{0}/{1}", taskUrl, SourceFileName);
+                    var url = string.Format("{0}/{1}", taskUrl, SourceFileName);
                     FileSystem.Download(url, sourcePath);
                     DevTool.Compile(workingDirectory, sourcePath);
                     Path = exeFile;

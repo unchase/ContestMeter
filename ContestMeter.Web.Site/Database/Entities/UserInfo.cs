@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ContestMeter.Web.Site.Database.Entities
 {
@@ -12,7 +9,7 @@ namespace ContestMeter.Web.Site.Database.Entities
     {
         public UserInfo()
         {
-            this.Users = new HashSet<ApplicationUser>();
+            Users = new HashSet<ApplicationUser>();
         }
 
         [Key]

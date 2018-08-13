@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 using System.Diagnostics;
-using System.IO;
 
 namespace ContestMeter.Common
 {
@@ -29,7 +24,7 @@ namespace ContestMeter.Common
 #if DEBUG
             //File.WriteAllText(Path.Combine(Solution.LocalFolder, "log.bat"), CompileCommand + " " + string.Format(CommandArgs, path));
 #endif
-            ProcessStartInfo prcInfo = new ProcessStartInfo()
+            var prcInfo = new ProcessStartInfo()
             {
                 FileName = CompileCommand,
                 CreateNoWindow = true,

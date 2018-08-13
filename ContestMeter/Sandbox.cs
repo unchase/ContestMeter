@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Security;
 using System.Security.Policy;
@@ -16,17 +14,17 @@ namespace ContestMeter.Common
 
         public static void Write2LogFile(string logPath, string[] messages)
         {
-            LocalFileSystem fs = new LocalFileSystem();
+            var fs = new LocalFileSystem();
             if (!fs.Exists(Path.GetDirectoryName(logPath)))
                 fs.CreateFolder(Path.GetDirectoryName(logPath));
 
-            using (StreamWriter sw = new StreamWriter(logPath, true, Encoding.Default))
+            using (var sw = new StreamWriter(logPath, true, Encoding.Default))
             {
                 try
                 {
                     foreach (var line in messages)
                     {
-                        if (line != "" && line != null)
+                        if (!string.IsNullOrEmpty(line))
                             sw.WriteLine(line);
                     }
                     sw.WriteLine();
@@ -34,8 +32,7 @@ namespace ContestMeter.Common
                 }
                 finally
                 {
-                    if (sw != null)
-                        sw.Close();
+                    sw.Close();
                 }
             }
         }
@@ -44,18 +41,20 @@ namespace ContestMeter.Common
         {
             WorkindDirectory = workingDirectory;
             SandboxPermissionSet = permissionSet;
-            AppDomainSetup sandboxAppDomainSetup = new AppDomainSetup();
-            sandboxAppDomainSetup.ApplicationBase = WorkindDirectory;
-            sandboxAppDomainSetup.PrivateBinPath = WorkindDirectory;
+            var sandboxAppDomainSetup = new AppDomainSetup
+            {
+                ApplicationBase = WorkindDirectory,
+                PrivateBinPath = WorkindDirectory
+            };
             SandboxAppDomain = AppDomain.CreateDomain("Sandbox", new Evidence(), sandboxAppDomainSetup, SandboxPermissionSet);
         }
 
         public void ExecuteAssembly(string assemblyFile)
         {
-            var currentDirectory = System.Environment.CurrentDirectory;
-            System.Environment.CurrentDirectory = WorkindDirectory;
+            var currentDirectory = Environment.CurrentDirectory;
+            Environment.CurrentDirectory = WorkindDirectory;
             SandboxAppDomain.ExecuteAssembly(assemblyFile);
-            System.Environment.CurrentDirectory = currentDirectory;
+            Environment.CurrentDirectory = currentDirectory;
         }
 
         public string GetWorkingDirectory()

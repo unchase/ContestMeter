@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ContestMeter.Web.Site.Database.Entities
 {
@@ -11,7 +8,7 @@ namespace ContestMeter.Web.Site.Database.Entities
     {
         public ContestsType()
         {
-            this.Contests = new HashSet<Contest>();
+            Contests = new HashSet<Contest>();
         }
 
         [Key]

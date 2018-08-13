@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Data;
-using System.Globalization;
-using System.ComponentModel;
 using System.Windows;
 
 namespace ContestMeter.UI
@@ -26,7 +21,7 @@ namespace ContestMeter.UI
             {
                 if (value != null && value is bool)
                 {
-                    bool flag = (bool)value;
+                    var flag = (bool)value;
                     return flag ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
                 }
 

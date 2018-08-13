@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Net;
 using System.IO;
 
@@ -23,15 +22,15 @@ namespace ContestMeter.Common
         public static IPAddress GetLocalIP4()
         {
             var host = Dns.GetHostEntry(String.Empty);
-            var ipAddr = host.AddressList.Where(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
-                && x != IPAddress.Any && x != IPAddress.Broadcast && x != IPAddress.Loopback && !IPAddress.IsLoopback(x)).FirstOrDefault();
-            return ipAddr;
+            return host.AddressList.Where(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+                                               && x != IPAddress.Any && x != IPAddress.Broadcast &&
+                                               x != IPAddress.Loopback && !IPAddress.IsLoopback(x)).FirstOrDefault();
         }
 
         public bool Upload(Stream source, string destination)
         {
             // Get the object used to communicate with the server.
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(destination);
+            var request = (FtpWebRequest)WebRequest.Create(destination);
             request.Method = WebRequestMethods.Ftp.UploadFile;
 
             request.Credentials = Credentials;

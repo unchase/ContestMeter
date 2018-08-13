@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Hosting;
 using System.Web.Mvc;
@@ -16,7 +13,6 @@ using ContestMeter.Web.Site.Database.Entities;
 using ContestMeter.Web.Site.Models;
 using ContestMeter.Web.Site.Queue;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 using Task = ContestMeter.Web.Site.Database.Entities.Task;
 
 namespace ContestMeter.Web.Site.Controllers
@@ -24,16 +20,16 @@ namespace ContestMeter.Web.Site.Controllers
     [Authorize(Roles = "participant")]
     public class ParticipantController : Controller
     {
-        private static CheckSolutionQueue checkSolutionQueue = new CheckSolutionQueue(2000, 4);
+        private static readonly CheckSolutionQueue _checkSolutionQueue = new CheckSolutionQueue(2000, 4);
 
-        private ContestMeterDbContext db = new ContestMeterDbContext();
+        private readonly ContestMeterDbContext _db = new ContestMeterDbContext();
 
 
         public async System.Threading.Tasks.Task<ActionResult> Contests()
         {
             var model = new ParticipantContestsViewModel
             {
-                Contests = await db.Contests.Include(c => c.ContestsType).Include(c => c.Teacher).ToListAsync()
+                Contests = await _db.Contests.Include(c => c.ContestsType).Include(c => c.Teacher).ToListAsync()
             };
             return View(model);
         }
@@ -45,14 +41,14 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = await db.Contests.FindAsync(id);
+            var contest = await _db.Contests.FindAsync(id);
             if (contest == null)
             {
                 return HttpNotFound();
             }
             
             var userAttempts =
-                db.UserAttempts.Where(ua => ua.ContestId == contest.Id)
+                _db.UserAttempts.Where(ua => ua.ContestId == contest.Id)
                     .Include(ua => ua.Contest)
                     .Include(ua => ua.DevelopmentTool)
                     .Include(ua => ua.Task)
@@ -75,16 +71,16 @@ namespace ContestMeter.Web.Site.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             
-            var userAttempt = db.UserAttempts.Find(id);
+            var userAttempt = _db.UserAttempts.Find(id);
             if (userAttempt == null)
             {
                 return HttpNotFound();
             }
 
             var currentUserId = User.Identity.GetUserId();
-            bool isAdministrator = User.IsInRole("administrator");
+            var isAdministrator = User.IsInRole("administrator");
             if (!isAdministrator &&
-                !db.ContestTeachers.Any(
+                !_db.ContestTeachers.Any(
                     ct =>
                         ct.ContestId == userAttempt.ContestId &&
                         userAttempt.Contest.TeacherId == currentUserId))
@@ -94,7 +90,7 @@ namespace ContestMeter.Web.Site.Controllers
                 return RedirectToAction("Information", new { id });
             }
             var lastPostedSolution =
-                db.PostedSolutions.FirstOrDefault(
+                _db.PostedSolutions.FirstOrDefault(
                     ps => ps.UserId == userAttempt.UserId && ps.TaskId == userAttempt.TaskId);
             if (lastPostedSolution == null)
             {
@@ -112,12 +108,12 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var contest = await db.Contests.FindAsync(contestId);
+            var contest = await _db.Contests.FindAsync(contestId);
             if (contest == null)
             {
                 return HttpNotFound();
             }
-            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !db.ContestTeachers.Any(ct => ct.ContestId == contestId))
+            if (contest.TeacherId != User.Identity.GetUserId() && !User.IsInRole("administrator") && !_db.ContestTeachers.Any(ct => ct.ContestId == contestId))
             {
                 TempData["Message"] = "Вы не имеете право удалять результаты проверок для данного контеста";
                 return RedirectToAction("Information", new {id = contestId});
@@ -128,13 +124,13 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var userAttempt = await db.UserAttempts.FindAsync(id);
+            var userAttempt = await _db.UserAttempts.FindAsync(id);
             if (userAttempt == null)
             {
                 return HttpNotFound();
             }
-            db.Entry(userAttempt).State = EntityState.Deleted;
-            await db.SaveChangesAsync();
+            _db.Entry(userAttempt).State = EntityState.Deleted;
+            await _db.SaveChangesAsync();
 
             return RedirectToAction("Information", new { id = contestId });
         }
@@ -149,7 +145,7 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Contest contest = await db.Contests.FindAsync(id);
+            var contest = await _db.Contests.FindAsync(id);
             if (contest == null)
             {
                 return HttpNotFound();
@@ -164,7 +160,7 @@ namespace ContestMeter.Web.Site.Controllers
 
 
             var currentUserId = User.Identity.GetUserId();
-            var currentUser = db.Users.Find(currentUserId);
+            var currentUser = _db.Users.Find(currentUserId);
             if (currentUser == null)
             {
                 return HttpNotFound();
@@ -176,7 +172,7 @@ namespace ContestMeter.Web.Site.Controllers
             }
 
 
-            var tasks = await db.Tasks.Where(t => t.ContestId == contest.Id).ToListAsync();
+            var tasks = await _db.Tasks.Where(t => t.ContestId == contest.Id).ToListAsync();
             if (tasks == null || tasks.Count < 1)
             {
                 TempData["Message"] = "Произошла ошибка: кол-во задач в контесте '" + contest.Name + "' равно 0.";
@@ -192,7 +188,7 @@ namespace ContestMeter.Web.Site.Controllers
                 //return View("Error");
             }
             var taskFiles = Directory.GetFiles(HostingEnvironment.ApplicationPhysicalPath + "Documents/TasksDescriptions/",
-                (tasks[(int)currentTaskNumber].Id).ToString() + ".*");
+                (tasks[(int)currentTaskNumber].Id) + ".*");
             if (!taskFiles.Any())
             {
                 TempData["Message"] = "Произошла ошибка: pdf-файл с описанием задания '" + tasks[(int)currentTaskNumber].Name + "' не найден.";
@@ -215,7 +211,7 @@ namespace ContestMeter.Web.Site.Controllers
         [ValidateAntiForgeryToken]
         public async System.Threading.Tasks.Task<ActionResult> Participate([Bind(Include = "ContestId, CurrentTaskId, CurrentTaskNumber, SelectedDevelopmentToolId")]ParticipantTaskPartialViewModel model, HttpPostedFileBase fileUpload)
         {
-            var tasks = await db.Tasks.Where(t => t.ContestId == model.ContestId).ToListAsync();
+            var tasks = await _db.Tasks.Where(t => t.ContestId == model.ContestId).ToListAsync();
             if (tasks == null || tasks.Count < 1)
             {
                 TempData["Message"] = "Произошла ошибка: кол-во задач и компиляторов должно быть больше 0";
@@ -231,7 +227,7 @@ namespace ContestMeter.Web.Site.Controllers
             };
             if (ModelState.IsValid)
             {
-                if (fileUpload != null && !String.IsNullOrEmpty(fileUpload.FileName))
+                if (!string.IsNullOrEmpty(fileUpload?.FileName))
                 {
                     var ext = Path.GetExtension(fileUpload.FileName);
                     if (_allowedExtForSolutionFiles.Any(e => e == ext))
@@ -241,21 +237,19 @@ namespace ContestMeter.Web.Site.Controllers
                         {
                             solutionData = binaryReader.ReadBytes(fileUpload.ContentLength);
                         }
-                        string currentUserId = User.Identity.GetUserId();
-                        PostedSolution postedSolution = await db.PostedSolutions.Where(
+                        var currentUserId = User.Identity.GetUserId();
+                        var postedSolution = await _db.PostedSolutions.Where(
                                     s => s.TaskId == model.CurrentTaskId && s.UserId == currentUserId)
                                     .FirstOrDefaultAsync();
-                        Guid postedSolutionId;
                         if (postedSolution != null)
                         {
-                            postedSolutionId = postedSolution.Id;
                             postedSolution.Solution = solutionData;
-                            db.Entry(postedSolution).State = EntityState.Modified;
-                            await db.SaveChangesAsync();
+                            _db.Entry(postedSolution).State = EntityState.Modified;
+                            await _db.SaveChangesAsync();
                         }
                         else
                         {
-                            postedSolutionId = Guid.NewGuid();
+                            var postedSolutionId = Guid.NewGuid();
                             postedSolution = new PostedSolution
                             {
                                 Id = postedSolutionId,
@@ -266,23 +260,23 @@ namespace ContestMeter.Web.Site.Controllers
                                 IsChecked = false
                             };
 
-                            db.PostedSolutions.Add(postedSolution);
-                            db.SaveChanges();
+                            _db.PostedSolutions.Add(postedSolution);
+                            _db.SaveChanges();
                         }
                         var task = postedSolution.Task;
                         var contest = task.Contest;
-                        var devTool = db.DevelopmentTools.Find(model.SelectedDevelopmentToolId);
-                        var user = db.Users.Find(currentUserId);
-                        string postedSolutionsRootFolder = ConfigurationManager.AppSettings["PostedSolutionsRootFolder"];
-                        string contestTypeName = contest.ContestsType.Name;
-                        string contestName = contest.Name;
-                        string userIp = user.Ip;
-                        string solutionsFolder = Path.Combine(postedSolutionsRootFolder, contestTypeName, contestName,
+                        var devTool = _db.DevelopmentTools.Find(model.SelectedDevelopmentToolId);
+                        var user = _db.Users.Find(currentUserId);
+                        var postedSolutionsRootFolder = ConfigurationManager.AppSettings["PostedSolutionsRootFolder"];
+                        var contestTypeName = contest.ContestsType.Name;
+                        var contestName = contest.Name;
+                        var userIp = user.Ip;
+                        var solutionsFolder = Path.Combine(postedSolutionsRootFolder, contestTypeName, contestName,
                             userIp);
 
                         if (!Directory.Exists(solutionsFolder))
                             Directory.CreateDirectory(solutionsFolder);
-                        string sourcePath = Path.Combine(solutionsFolder, task.ExecutableName) + ext;
+                        var sourcePath = Path.Combine(solutionsFolder, task.ExecutableName) + ext;
 
                         if (ByteArrayToFile(sourcePath, solutionData))
                         {
@@ -294,9 +288,9 @@ namespace ContestMeter.Web.Site.Controllers
                                         LocalFolder, sourcePath);
                                 });
 
-                                checkSolutionQueue.AddTask(taskCheckSolution);
+                                _checkSolutionQueue.AddTask(taskCheckSolution);
                                 taskCheckSolution.Wait();
-                                Solution solution = taskCheckSolution.Result;
+                                var solution = taskCheckSolution.Result;
 
                                 var userAttempt = new UserAttempt
                                 {
@@ -312,10 +306,10 @@ namespace ContestMeter.Web.Site.Controllers
                                     FailedRuns = solution.FailedRuns,
                                     FailedChecks = solution.FailedChecks
                                 };
-                                db.UserAttempts.Add(userAttempt);
+                                _db.UserAttempts.Add(userAttempt);
                                 postedSolution.IsChecked = true;
-                                db.Entry(postedSolution).State = EntityState.Modified;
-                                await db.SaveChangesAsync();
+                                _db.Entry(postedSolution).State = EntityState.Modified;
+                                await _db.SaveChangesAsync();
 
                                 TempData["Message"] = "Решение было отправлено и проверено. \nБаллов: " + solution.WeightedScore 
                                     + "\nПроваленных запусков: " + solution.FailedRuns 
@@ -332,8 +326,8 @@ namespace ContestMeter.Web.Site.Controllers
                                     UserId = user.Id,
                                     Text = ex.InnerException.Message
                                 };
-                                db.ExceptionsLogs.Add(exeptionLog);
-                                db.SaveChanges();
+                                _db.ExceptionsLogs.Add(exeptionLog);
+                                _db.SaveChanges();
 
                                 TempData["Message"] = "При проверке решения возникло исключение: " + ex.InnerException.Message;
                                 //ToDo: вывести результат в другом виде?
@@ -372,7 +366,7 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return HttpNotFound();
             }
-            var contest = db.Contests.FirstOrDefault(c => c.Id == contestId);
+            var contest = _db.Contests.FirstOrDefault(c => c.Id == contestId);
             if (contest == null)
             {
                 return HttpNotFound();
@@ -382,7 +376,7 @@ namespace ContestMeter.Web.Site.Controllers
                 ViewBag.ErrorMessage = "Произошла ошибка: выбранный контест не активен";
                 return PartialView("PartialError");
             }
-            var tasks = db.Tasks.Where(t => t.ContestId == contestId).ToList();
+            var tasks = _db.Tasks.Where(t => t.ContestId == contestId).ToList();
             if (tasks.Count < 1)
             {
                 ViewBag.ErrorMessage = "Произошла ошибка: кол-во задач должно быть больше 0";
@@ -396,7 +390,7 @@ namespace ContestMeter.Web.Site.Controllers
                 //return View("Error");
             }
             var taskFiles = Directory.GetFiles(HostingEnvironment.ApplicationPhysicalPath + "Documents/TasksDescriptions/",
-                (tasks[(int)currentTaskNumber].Id).ToString() + ".*");
+                (tasks[(int)currentTaskNumber].Id) + ".*");
             if (!taskFiles.Any())
             {
                 //ViewBag.ErrorMessage = "Произошла ошибка: pdf-файл с описанием задания '" + tasks[(int)currentTaskNumber].Name + "' не найден.";
@@ -404,7 +398,7 @@ namespace ContestMeter.Web.Site.Controllers
                 return RedirectToAction("Contests");
                 //return Content("Произошла ошибка: pdf-файл с описанием задания '" + tasks[(int)currentTaskNumber].Name + "' не найден.");
             }
-            var devTools = db.DevelopmentTools.Where(d => d.ContestId == contestId).ToList();
+            var devTools = _db.DevelopmentTools.Where(d => d.ContestId == contestId).ToList();
             if (devTools.Count < 1)
             {
                 ViewBag.ErrorMessage = "Произошла ошибка: кол-во компиляторов должно быть больше 0";
@@ -426,7 +420,7 @@ namespace ContestMeter.Web.Site.Controllers
         #region Addition
 
         //ToDo: вынести добавление разрешенных расширений в создание инструментов разработчика
-        private string[] _allowedExtForSolutionFiles =
+        private readonly string[] _allowedExtForSolutionFiles =
         {
             ".cs", ".c", ".cpp", ".pas", ".py", ".java", ".f", ".cc", ".f77", ".f90"
         };
@@ -450,7 +444,7 @@ namespace ContestMeter.Web.Site.Controllers
         private string GetFirstTaskDescriptionFile(Guid taskId)
         {
             var taskFiles = Directory.GetFiles(HostingEnvironment.ApplicationPhysicalPath + "Documents/TasksDescriptions/",
-                taskId.ToString() + ".*");
+                taskId + ".*");
             return GetBaseUrl() + "Documents/TasksDescriptions/" + Path.GetFileName(taskFiles.FirstOrDefault());
         }
 
@@ -458,7 +452,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             get
             {
-                var folder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Tester");
+                var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Tester");
 
                 if (!Directory.Exists(folder))
                 {
@@ -473,16 +467,16 @@ namespace ContestMeter.Web.Site.Controllers
         {
             try
             {
-                using (System.IO.FileStream _FileStream =
-                    new System.IO.FileStream(_FileName, System.IO.FileMode.Create,
-                        System.IO.FileAccess.Write))
+                using (var _FileStream =
+                    new FileStream(_FileName, FileMode.Create,
+                        FileAccess.Write))
                 {
                     _FileStream.Write(_ByteArray, 0, _ByteArray.Length);
                 }
 
                 return true;
             }
-            catch (Exception _Exception)
+            catch (Exception exception)
             {
                 //Console.WriteLine("Exception caught in process: {0}",
                 //                  _Exception.ToString());
@@ -493,34 +487,36 @@ namespace ContestMeter.Web.Site.Controllers
 
         private Solution CheckPostedSolution(Contest contest, ApplicationUser user, Task task, DevelopmentTool devTool, string solutionsFolder, string localFolder, string sourcePath)
         {
-            Solution solution = new Solution(new LocalFileSystem());
-            solution.Configuration = new Common.Configuration
+            var solution = new Solution(new LocalFileSystem())
             {
-                FileSystem = new LocalFileSystem(),
-                ContestType = contest.ContestsType.Name,
-                ContestName = contest.Name,
-                Site = ConfigurationManager.AppSettings["SiteConfigFolder"]
+                Configuration = new Common.Configuration
+                {
+                    FileSystem = new LocalFileSystem(),
+                    ContestType = contest.ContestsType.Name,
+                    ContestName = contest.Name,
+                    Site = ConfigurationManager.AppSettings["SiteConfigFolder"]
+                },
+                DevTool = new DeveloperTool
+                {
+                    Name = devTool.Name,
+                    CompileCommand = devTool.CompileCommand,
+                    CommandArgs = devTool.CommandArgs,
+                    IsExeFile = false
+                },
+                Task = new Common.Task
+                {
+                    Name = task.Name,
+                    ExecutableName = task.ExecutableName,
+                    CheckerName = task.CheckerName,
+                    TestsFolder = task.TestsFolder,
+                    TimeLimit = task.TimeLimit,
+                    Weight = task.Weight,
+                    MaxSourceSize = task.MaxSourceSize,
+                    MaxMemorySize = task.MaxMemorySize
+                },
+                Path = sourcePath,
+                LocalSourcePath = sourcePath
             };
-            solution.DevTool = new DeveloperTool
-            {
-                Name = devTool.Name,
-                CompileCommand = devTool.CompileCommand,
-                CommandArgs = devTool.CommandArgs,
-                IsExeFile = false
-            };
-            solution.Task = new Common.Task
-            {
-                Name = task.Name,
-                ExecutableName = task.ExecutableName,
-                CheckerName = task.CheckerName,
-                TestsFolder = task.TestsFolder,
-                TimeLimit = task.TimeLimit,
-                Weight = task.Weight,
-                MaxSourceSize = task.MaxSourceSize,
-                MaxMemorySize = task.MaxMemorySize
-            };
-            solution.Path = sourcePath;
-            solution.LocalSourcePath = sourcePath;
 
             solution.Check(LocalFolder, solutionsFolder);
 
@@ -532,7 +528,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
         }

@@ -4,7 +4,6 @@ using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 using ContestMeter.Web.Site.Database;
 using ContestMeter.Web.Site.Database.Entities;
@@ -17,14 +16,14 @@ namespace ContestMeter.Web.Site.Controllers
     [Authorize(Roles = "administrator")]
     public class TeamController : Controller
     {
-        private ContestMeterDbContext db = new ContestMeterDbContext();
+        private readonly ContestMeterDbContext _db = new ContestMeterDbContext();
 
         [AllowAnonymous]
         public ActionResult Index()
         {
-            TeamsIndexViewModel model = new TeamsIndexViewModel
+            var model = new TeamsIndexViewModel
             {
-                Teams = db.Teams.Include(c => c.Contests).Include(p => p.Participants).ToList()
+                Teams = _db.Teams.Include(c => c.Contests).Include(p => p.Participants).ToList()
             };
 
             return View(model);
@@ -39,7 +38,7 @@ namespace ContestMeter.Web.Site.Controllers
                 //ViewBag.ErrorMessage = "Только администратор имеет право создавать команды";
                 //return View("Error");
             }
-            TeamsCreateViewModel model = new TeamsCreateViewModel
+            var model = new TeamsCreateViewModel
             {
                 Name = "",
                 MaxTeamNumber = 1
@@ -53,7 +52,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await db.Teams.AnyAsync(c => c.Name == model.Name) || model.Name == "")
+                if (await _db.Teams.AnyAsync(c => c.Name == model.Name) || model.Name == "")
                 {
                     ModelState.AddModelError("", "Команда с таким названием уже существует или не задано название команды");
                 }
@@ -69,8 +68,8 @@ namespace ContestMeter.Web.Site.Controllers
                         Participants = new List<ApplicationUser>()
                     };
 
-                    db.Teams.Add(team);
-                    await db.SaveChangesAsync();
+                    _db.Teams.Add(team);
+                    await _db.SaveChangesAsync();
                     return RedirectToAction("Index");
                 }
             }
@@ -83,7 +82,7 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Team team = await db.Teams.FindAsync(id);
+            var team = await _db.Teams.FindAsync(id);
             if (team == null)
             {
                 return HttpNotFound();
@@ -110,12 +109,12 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (ModelState.IsValid)
             {
-                var currentTeam = db.Teams.Find(model.TeamId);
+                var currentTeam = _db.Teams.Find(model.TeamId);
                 if (currentTeam == null)
                 {
                     return HttpNotFound();
                 }
-                if ((await db.Teams.AnyAsync(t => t.Name == model.Name) || model.Name == "") && model.MaxTeamNumber == currentTeam.MaxTeamNumber)
+                if ((await _db.Teams.AnyAsync(t => t.Name == model.Name) || model.Name == "") && model.MaxTeamNumber == currentTeam.MaxTeamNumber)
                 {
                     ModelState.AddModelError("", "Команда с таким названием уже существует или не задано название команды");
                 }
@@ -131,7 +130,7 @@ namespace ContestMeter.Web.Site.Controllers
                     }
                     else
                     {
-                        var team = db.Teams.Find(model.TeamId);
+                        var team = _db.Teams.Find(model.TeamId);
                         if (team == null)
                         {
                             return HttpNotFound();
@@ -139,8 +138,8 @@ namespace ContestMeter.Web.Site.Controllers
                         team.Name = model.Name;
                         team.MaxTeamNumber = model.MaxTeamNumber;
 
-                        db.Entry(team).State = EntityState.Modified;
-                        await db.SaveChangesAsync();
+                        _db.Entry(team).State = EntityState.Modified;
+                        await _db.SaveChangesAsync();
                         return RedirectToAction("Index");
                     }
                 }
@@ -154,7 +153,7 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Team team = await db.Teams.FindAsync(id);
+            var team = await _db.Teams.FindAsync(id);
             if (team == null)
             {
                 return HttpNotFound();
@@ -173,21 +172,21 @@ namespace ContestMeter.Web.Site.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(Guid id)
         {
-            Team team = await db.Teams.FindAsync(id);
+            var team = await _db.Teams.FindAsync(id);
             if (team == null)
             {
                 return HttpNotFound();
             }
-            var teamParticipants = db.Users.Where(u => u.TeamId == id);
+            var teamParticipants = _db.Users.Where(u => u.TeamId == id);
             foreach (var teamParticipant in teamParticipants)
             {
                 teamParticipant.TeamId = null;
                 teamParticipant.Team = null;
-                db.Entry(teamParticipant).State = EntityState.Modified;
+                _db.Entry(teamParticipant).State = EntityState.Modified;
             }
 
-            db.Teams.Remove(team);
-            await db.SaveChangesAsync();
+            _db.Teams.Remove(team);
+            await _db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
@@ -198,7 +197,7 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Team team = db.Teams.Find(id);
+            var team = _db.Teams.Find(id);
             if (team == null)
             {
                 return HttpNotFound();
@@ -210,11 +209,11 @@ namespace ContestMeter.Web.Site.Controllers
                 //ViewBag.ErrorMessage = "Только администратор имеет право просматривать список контестов для этой команды";
                 //return View("Error");
             }
-            var contests = db.Contests;
+            var contests = _db.Contests;
 
-            var teamContests = db.TeamContests.Where(tc => tc.TeamId == team.Id).ToList();
-            List<Guid> contestIds = new List<Guid>();
-            List<Guid> teamContestIds = new List<Guid>();
+            var teamContests = _db.TeamContests.Where(tc => tc.TeamId == team.Id).ToList();
+            var contestIds = new List<Guid>();
+            var teamContestIds = new List<Guid>();
             foreach (var contest in contests)
             {
                 if (!teamContests.Any(tc => tc.TeamId == team.Id && tc.ContestId == contest.Id))
@@ -226,8 +225,8 @@ namespace ContestMeter.Web.Site.Controllers
             var model = new TeamsContestsListViewModel
             {
                 TeamId = id,
-                Contests = db.Contests.Include(c => c.Teacher).Include(c => c.ContestsType).Where(c => contestIds.Contains(c.Id)).AsQueryable(),
-                TeamContests = db.Contests.Include(c => c.Teacher).Include(c => c.ContestsType).Where(tc => teamContestIds.Contains(tc.Id)).AsQueryable()
+                Contests = _db.Contests.Include(c => c.Teacher).Include(c => c.ContestsType).Where(c => contestIds.Contains(c.Id)).AsQueryable(),
+                TeamContests = _db.Contests.Include(c => c.Teacher).Include(c => c.ContestsType).Where(tc => teamContestIds.Contains(tc.Id)).AsQueryable()
             };
 
             return PartialView(model);
@@ -239,7 +238,7 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var team = await db.Teams.FindAsync(teamId);
+            var team = await _db.Teams.FindAsync(teamId);
             if (team == null)
             {
                 return HttpNotFound();
@@ -257,16 +256,16 @@ namespace ContestMeter.Web.Site.Controllers
                 ContestId = (Guid)id
             };
 
-            var contest = db.Contests.Find(id);
+            var contest = _db.Contests.Find(id);
             if (contest == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             team.Contests.Add(contest);
             
-            db.Entry(teamContest).State = EntityState.Added;
-            db.Entry(team).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            _db.Entry(teamContest).State = EntityState.Added;
+            _db.Entry(team).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
 
             return RedirectToAction("Edit", new { id = teamId });
         }
@@ -277,7 +276,7 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var team = await db.Teams.FindAsync(teamId);
+            var team = await _db.Teams.FindAsync(teamId);
             if (team == null)
             {
                 return HttpNotFound();
@@ -288,21 +287,21 @@ namespace ContestMeter.Web.Site.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var contest = db.Contests.Find(id);
+            var contest = _db.Contests.Find(id);
             if (contest == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             team.Contests.Remove(contest);
 
-            var teamContest = db.TeamContests.FirstOrDefault(tc => tc.ContestId == id);
+            var teamContest = _db.TeamContests.FirstOrDefault(tc => tc.ContestId == id);
             if (teamContest == null)
             {
                 return HttpNotFound();
             }
-            db.Entry(teamContest).State = EntityState.Deleted;
-            db.Entry(team).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            _db.Entry(teamContest).State = EntityState.Deleted;
+            _db.Entry(team).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
 
             return RedirectToAction("Edit", new { id = teamId });
         }
@@ -315,7 +314,7 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Team team = db.Teams.Find(id);
+            var team = _db.Teams.Find(id);
             if (team == null)
             {
                 return HttpNotFound();
@@ -330,13 +329,13 @@ namespace ContestMeter.Web.Site.Controllers
             }
 
             var currentUserId = User.Identity.GetUserId();
-            var roleStore = new RoleStore<IdentityRole>(db);
+            var roleStore = new RoleStore<IdentityRole>(_db);
             var roleManager = new RoleManager<IdentityRole>(roleStore);
             var participantRoleUsers = roleManager.Roles.First(r => r.Name == "participant").Users;
 
-            var teamParticipants = db.TeamParticipants.Where(tp => tp.TeamId == team.Id).ToList();
-            List<string> participantIds = new List<string>();
-            List<string> teamParicipantIds = new List<string>();
+            var teamParticipants = _db.TeamParticipants.Where(tp => tp.TeamId == team.Id).ToList();
+            var participantIds = new List<string>();
+            var teamParicipantIds = new List<string>();
             foreach (var participantRoleUser in participantRoleUsers)
             {
                 if (!teamParticipants.Any(tp => tp.TeamId == team.Id && tp.ParticipantId == participantRoleUser.UserId))
@@ -348,8 +347,8 @@ namespace ContestMeter.Web.Site.Controllers
             var model = new TeamsParticipantsListViewModel
             {
                 TeamId = id,
-                Participants = db.Users.Where(p => participantIds.Contains(p.Id) && !p.IsDeleted && p.Id != currentUserId),
-                TeamParticipants = db.Users.Where(p => teamParicipantIds.Contains(p.Id) && !p.IsDeleted && p.Id != currentUserId)
+                Participants = _db.Users.Where(p => participantIds.Contains(p.Id) && !p.IsDeleted && p.Id != currentUserId),
+                TeamParticipants = _db.Users.Where(p => teamParicipantIds.Contains(p.Id) && !p.IsDeleted && p.Id != currentUserId)
             };
             return PartialView(model);
         }
@@ -360,13 +359,13 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var team = await db.Teams.FindAsync(teamId);
+            var team = await _db.Teams.FindAsync(teamId);
             if (team == null)
             {
                 return HttpNotFound();
             }
 
-            if (!User.IsInRole("administrator") && !db.TeamParticipants.Any(tp => tp.TeamId == teamId))
+            if (!User.IsInRole("administrator") && !_db.TeamParticipants.Any(tp => tp.TeamId == teamId))
             {
                 TempData["Message"] = "Вы не имеете право добавлять участников для данной команды";
                 return RedirectToAction("Edit", new { id });
@@ -385,7 +384,7 @@ namespace ContestMeter.Web.Site.Controllers
                 return RedirectToAction("Edit", new { id = teamId });
             }
 
-            var participant = db.Users.Find(id);
+            var participant = _db.Users.Find(id);
             if (participant == null)
             {
                 return HttpNotFound();
@@ -406,10 +405,10 @@ namespace ContestMeter.Web.Site.Controllers
                 ParticipantId = id
             };
 
-            db.Entry(teamParticipant).State = EntityState.Added;
-            db.Entry(participant).State = EntityState.Modified;
-            db.Entry(team).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            _db.Entry(teamParticipant).State = EntityState.Added;
+            _db.Entry(participant).State = EntityState.Modified;
+            _db.Entry(team).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
 
             return RedirectToAction("Edit", new { id = teamId });
         }
@@ -420,13 +419,13 @@ namespace ContestMeter.Web.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var team = await db.Teams.FindAsync(teamId);
+            var team = await _db.Teams.FindAsync(teamId);
             if (team == null)
             {
                 return HttpNotFound();
             }
 
-            if (!User.IsInRole("administrator") && !db.TeamParticipants.Any(tp => tp.TeamId == teamId))
+            if (!User.IsInRole("administrator") && !_db.TeamParticipants.Any(tp => tp.TeamId == teamId))
             {
                 TempData["Message"] = "Вы не имеете право удалять участников из данной команды";
                 return RedirectToAction("Edit", new { id = teamId });
@@ -439,7 +438,7 @@ namespace ContestMeter.Web.Site.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var participant = db.Users.Find(id);
+            var participant = _db.Users.Find(id);
             if (participant == null)
             {
                 return HttpNotFound();
@@ -448,16 +447,16 @@ namespace ContestMeter.Web.Site.Controllers
             participant.Team = null;
             team.Participants.Remove(participant);
 
-            var teamParticipant = db.TeamParticipants.FirstOrDefault(tp => tp.ParticipantId == id);
+            var teamParticipant = _db.TeamParticipants.FirstOrDefault(tp => tp.ParticipantId == id);
             if (teamParticipant == null)
             {
                 return HttpNotFound();
             }
 
-            db.Entry(teamParticipant).State = EntityState.Deleted;
-            db.Entry(participant).State = EntityState.Modified;
-            db.Entry(team).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            _db.Entry(teamParticipant).State = EntityState.Deleted;
+            _db.Entry(participant).State = EntityState.Modified;
+            _db.Entry(team).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
 
             return RedirectToAction("Edit", new { id = teamId });
         }
@@ -466,7 +465,7 @@ namespace ContestMeter.Web.Site.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
         }

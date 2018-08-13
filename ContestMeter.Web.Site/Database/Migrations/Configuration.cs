@@ -6,11 +6,10 @@ using Microsoft.AspNet.Identity.EntityFramework;
 namespace ContestMeter.Web.Site.Database.Migrations
 {
     using System;
-    using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<ContestMeter.Web.Site.Database.ContestMeterDbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<ContestMeterDbContext>
     {
         public Configuration()
         {
@@ -19,7 +18,7 @@ namespace ContestMeter.Web.Site.Database.Migrations
             MigrationsDirectory = @"Database\Migrations";
         }
 
-        protected override void Seed(ContestMeter.Web.Site.Database.ContestMeterDbContext context)
+        protected override void Seed(ContestMeterDbContext context)
         {
             // добавляем в базу данных роли "administrator", "teacher" и "participant"
             var roleStore = new RoleStore<IdentityRole>(context);

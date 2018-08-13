@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ContestMeter.Web.Site.Database.Entities
 {
@@ -11,10 +8,10 @@ namespace ContestMeter.Web.Site.Database.Entities
     {
         public Contest()
         {
-            this.DevelopmentTools = new HashSet<DevelopmentTool>();
-            this.ExceptionsLogs = new HashSet<ExceptionsLog>();
-            this.Tasks = new HashSet<Task>();
-            this.UserAttempts = new HashSet<UserAttempt>();
+            DevelopmentTools = new HashSet<DevelopmentTool>();
+            ExceptionsLogs = new HashSet<ExceptionsLog>();
+            Tasks = new HashSet<Task>();
+            UserAttempts = new HashSet<UserAttempt>();
         }
 
         [Key]
