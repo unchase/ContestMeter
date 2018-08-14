@@ -14,7 +14,7 @@
 - [IIS Server 7.5 Express](https://www.microsoft.com/ru-ru/download/details.aspx?id=1038) или выше.
 
 <a href="https://github.com/unchase/ContestMeter/releases/latest" rel="nofollow"><img src="https://img.shields.io/github/downloads/unchase/ContestMeter/total.svg?maxAge=86400&&style=flat-square" alt="GitHub Releases (latest)"></a>
-[![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/unchase/contestmeter.svg?style=flat-square)](https://github.com/unchase/Centurion/releases/latest)
+[![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/unchase/contestmeter.svg?style=flat-square)](https://github.com/unchase/contestmeter/releases/latest)
 
 ## Supported OS
 * Windows 7/8/8.1/10
