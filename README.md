@@ -1,4 +1,4 @@
-![Centurion logo](https://raw.githubusercontent.com/unchase/contestmeter/master/Images/contestmeter_logo.png) 
+![Centurion logo](https://raw.githubusercontent.com/unchase/ContestMeter/master/Images/contestmeter_logo.png) 
 
 
 # ContestMeter
