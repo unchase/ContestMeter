@@ -63,7 +63,7 @@
 - Открытый исходный код (*тестирующие системы Новосибирских и Уральских университетов, а также ТТИ ЮФУ, являются закрытыми*)
 - Поддержка со стороны разработчиков (*у PCMC-2 отсутствует поддержка*)
 - Интуитивно понятный интерфейс (*ejudge имеет громоздкий интерфейс, труднопереносима, труднонастраиваема и содержит множество ошибок*).
-
+ 
 ## Links
 * Issue tracker: [![GitHub issues](https://img.shields.io/github/issues/unchase/contestmeter/shields.svg?style=flat-square)](https://github.com/unchase/contestmeter/issues) [![GitHub issues-closed](https://img.shields.io/github/issues-closed/unchase/contestmeter.svg?style=flat-square)](https://GitHub.com/unchase/contestmeter/issues?q=is%3Aissue+is%3Aclosed)
 * Website: [![Website contestmeter.mmcs.sfedu.ru](https://img.shields.io/website-up-down-green-red/http/contestmeter.mmcs.sfedu.ru.svg?style=flat-square)](http://contestmeter.mmcs.sfedu.ru/)
